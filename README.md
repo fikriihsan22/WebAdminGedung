@@ -1,8 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Admin Gedung Web
 
-## Getting Started
+Next.js application for the Admin Management Gedung MVP.
 
-First, run the development server:
+## Local setup
+
+Requirements: Node.js compatible with the installed Next.js version, pnpm 11, and PostgreSQL 15 or newer.
+
+```bash
+pnpm install
+cp .env.example .env
+```
+
+Set `DATABASE_URL` in `.env` to a development PostgreSQL database, then generate the typed database contract:
+
+```bash
+pnpm contract:emit
+```
+
+Start development:
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000).
+
+## Validation
+
+```bash
+pnpm check
+pnpm prisma migration status
+```
+
+`pnpm check` runs linting, TypeScript checking, Prisma contract generation, and a production build. Do not use a production database during local development.
+
+<!-- Legacy create-next-app instructions removed; use the setup above. -->
+
+<!-- Legacy create-next-app instructions retained below only for reference.
 
 ```bash
 npm run dev

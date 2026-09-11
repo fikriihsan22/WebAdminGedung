@@ -1,0 +1,43 @@
+// use prisma-next
+
+enum UserRole {
+  @@type("pg/text@1")
+
+  SUPER_ADMIN
+  BUILDING_ADMIN
+}
+
+model User {
+  id         String    @id @default(uuid())
+  username   String    @unique
+  pinHash    String
+  role       UserRole  @default(BUILDING_ADMIN)
+  buildingId String?
+  building   Building? @relation(fields: [buildingId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  temporal.updatedAt()
+}
+
+model Building {
+  id        String   @id @default(uuid())
+  name      String
+  location  String?
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+  users     User[]
+  events    Event[]
+}
+
+model Event {
+  id              String   @id @default(uuid())
+  clientName      String
+  eventDate       DateTime
+  session         String
+  dpAmount        Int      @default(0)
+  remainingAmount Int      @default(0)
+  status          String   @default("scheduled")
+  buildingId      String
+  building        Building @relation(fields: [buildingId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       temporal.updatedAt()
+}

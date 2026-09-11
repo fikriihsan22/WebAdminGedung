@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Practical guide to the Admin Gedung Web project setup">
+  <title>Admin Gedung Web · Project Setup Guide</title>
+  <style>
+    :root { --ink:#172033; --muted:#5f6b7a; --line:#dce3ec; --paper:#fff; --bg:#f4f7fb; --brand:#164e63; --accent:#e6a23c; --code:#111827; --soft:#eef7f8; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
+    body { margin:0; color:var(--ink); background:var(--bg); font:16px/1.65 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    a { color:var(--brand); }
+    .hero { color:white; background:linear-gradient(135deg,#12344a,#17626a 65%,#d58c31); padding:72px 24px 56px; }
+    .wrap { max-width:1120px; margin:auto; }
+    .eyebrow { color:#fbd38d; font-weight:800; letter-spacing:.12em; text-transform:uppercase; font-size:.78rem; }
+    h1 { max-width:850px; margin:10px 0 14px; font-size:clamp(2.2rem,6vw,4.8rem); line-height:1.02; letter-spacing:-.05em; }
+    .lead { max-width:760px; margin:0; color:#e4f2f4; font-size:1.18rem; }
+    .layout { display:grid; grid-template-columns:250px minmax(0,1fr); gap:28px; max-width:1120px; margin:28px auto; padding:0 24px; }
+    nav { position:sticky; top:20px; align-self:start; padding:18px; border:1px solid var(--line); border-radius:16px; background:var(--paper); box-shadow:0 8px 24px #19324a0b; }
+    nav strong { display:block; margin-bottom:10px; }
+    nav a { display:block; padding:5px 0; text-decoration:none; font-size:.92rem; }
+    main { min-width:0; }
+    section { margin-bottom:28px; padding:30px; border:1px solid var(--line); border-radius:18px; background:var(--paper); box-shadow:0 8px 24px #19324a0b; }
+    h2 { margin:0 0 12px; font-size:1.8rem; letter-spacing:-.03em; }
+    h3 { margin:24px 0 8px; font-size:1.15rem; }
+    p { margin:10px 0; }
+    .note { margin:18px 0; padding:15px 17px; border-left:4px solid var(--accent); border-radius:8px; background:#fff8e9; }
+    .callout { margin:18px 0; padding:16px 18px; border-radius:10px; background:var(--soft); }
+    code { padding:.15em .38em; border-radius:5px; color:#075985; background:#e8f2f5; font: .9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    pre { overflow:auto; margin:14px 0; padding:18px; border-radius:12px; color:#dbeafe; background:var(--code); font: .83rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    pre code { padding:0; color:inherit; background:transparent; }
+    .tree { color:#d9f99d; }
+    table { width:100%; border-collapse:collapse; margin:14px 0; }
+    th, td { padding:11px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { color:var(--brand); background:#f7fafc; }
+    .steps { counter-reset:step; padding:0; list-style:none; }
+    .steps li { counter-increment:step; position:relative; padding:0 0 16px 42px; }
+    .steps li::before { content:counter(step); position:absolute; left:0; top:1px; display:grid; place-items:center; width:27px; height:27px; border-radius:50%; color:white; background:var(--brand); font-weight:800; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:99px; color:#075985; background:#dff4f6; font-size:.78rem; font-weight:700; }
+    footer { padding:22px 24px 48px; color:var(--muted); text-align:center; font-size:.9rem; }
+    @media (max-width:800px) { .layout { display:block; } nav { position:static; margin-bottom:20px; } section { padding:22px; } }
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="wrap">
+      <div class="eyebrow">Admin Gedung Web · practical project guide</div>
+      <h1>How this project is put together</h1>
+      <p class="lead">A source-based walkthrough of the current Next.js 16 + React 19 + Tailwind 4 + Prisma Next/PostgreSQL setup, with implementation examples for turning the scaffold into a building-event admin application.</p>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav aria-label="Guide navigation">
+      <strong>On this page</strong>
+      <a href="#snapshot">1. Current snapshot</a>
+      <a href="#architecture">2. Architecture</a>
+      <a href="#run">3. Run locally</a>
+      <a href="#next">4. Next.js implementation</a>
+      <a href="#database">5. Database workflow</a>
+      <a href="#ui">6. UI workflow</a>
+      <a href="#quality">7. Quality loop</a>
+      <a href="#roadmap">8. Recommended roadmap</a>
+    </nav>
+
+    <main>
+      <section id="snapshot">
+        <h2>1. What exists today</h2>
+        <p>This repository is an early MVP foundation rather than a finished admin dashboard. The browser currently renders the starter content from <code>src/app/page.tsx</code>. The meaningful application foundation is already present in the package setup, styling system, typed database contract, and project scripts.</p>
+        <div class="note"><strong>Important:</strong> the database model is ahead of the UI. That is useful: the next feature can be implemented vertically—from one route, to one query, to one form—without redesigning the foundation.</div>
+        <table>
+          <thead><tr><th>Area</th><th>Current implementation</th><th>Why it matters</th></tr></thead>
+          <tbody>
+            <tr><td>Web framework</td><td>Next.js <code>16.3.3</code>, App Router</td><td>Folders under <code>src/app</code> become routes; server rendering is the default.</td></tr>
+            <tr><td>UI</td><td>React <code>19.2.8</code>, Tailwind CSS 4, shadcn base-nova, Base UI</td><td>Reusable components can share design tokens and accessible primitives.</td></tr>
+            <tr><td>Database</td><td>PostgreSQL 15+, Prisma Next contract</td><td><code>schema.prisma</code> is the source of truth; generated files provide types and runtime metadata.</td></tr>
+            <tr><td>Models</td><td><code>User</code>, <code>Building</code>, <code>Event</code></td><td>The domain supports role-aware building administration and event tracking.</td></tr>
+            <tr><td>Validation</td><td>ESLint, TypeScript, contract emission, production build</td><td><code>pnpm check</code> is the project’s main “is this safe?” gate.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="architecture">
+        <h2>2. Read the repository as a map</h2>
+        <pre class="tree"><code>admin-gedung-web/
+├── src/app/                 # routes, root layout, global CSS
+│   ├── layout.tsx           # shared HTML shell + metadata
+│   ├── page.tsx             # route: /
+│   └── globals.css          # Tailwind imports + design tokens
+├── src/components/ui/       # reusable UI primitives (Button exists)
+├── src/lib/                 # shared helpers (cn class merger)
+├── prisma/
+│   ├── schema.prisma        # editable data contract
+│   ├── db.ts                # typed database client
+│   ├── schema.json          # generated runtime contract
+│   └── schema.d.ts          # generated TypeScript contract
+├── migrations/              # generated contract/migration snapshots
+├── public/                  # static files served from /
+├── next.config.ts           # Next configuration (currently default)
+├── tsconfig.json            # strict TS + @/* → ./src/* alias
+├── components.json          # shadcn component conventions
+└── package.json             # commands and dependencies</code></pre>
+        <h3>How a request flows</h3>
+        <p>A browser request such as <code>/events</code> maps to <code>src/app/events/page.tsx</code>. That page can read data on the server, render HTML, and compose components from <code>src/components</code>. If the page needs browser state—filters, modal state, or click handlers—put that interactive part in a small file marked <code>"use client"</code>.</p>
+        <div class="callout"><strong>Rule of thumb:</strong> keep data access and secrets in Server Components or server-only modules; keep client components focused on interaction and pass them serializable data.</div>
+      </section>
+
+      <section id="run">
+        <h2>3. Run the project locally</h2>
+        <ol class="steps">
+          <li><strong>Install the exact toolchain.</strong> Use a Node.js version compatible with the installed Next.js version and pnpm 11. The lockfile is <code>pnpm-lock.yaml</code>, so pnpm should be the package manager.</li>
+          <li><strong>Install packages.</strong><pre><code>pnpm install</code></pre></li>
+          <li><strong>Configure a development database.</strong> Create a local PostgreSQL 15+ database and put its connection string in <code>.env</code>. Never point local work at production.</li>
+          <li><strong>Compile the database contract.</strong><pre><code>pnpm contract:emit</code></pre>This updates <code>prisma/schema.json</code> and <code>prisma/schema.d.ts</code> from <code>prisma/schema.prisma</code>.</li>
+          <li><strong>Start Next.js.</strong><pre><code>pnpm dev</code></pre>Open <code>http://localhost:3000</code>. Next’s Fast Refresh updates the page while you edit source files.</li>
+        </ol>
+        <p>The useful commands are:</p>
+        <pre><code>pnpm dev             # development server
+pnpm lint            # ESLint
+pnpm exec tsc --noEmit
+pnpm contract:emit   # regenerate Prisma contract outputs
+pnpm build           # production build
+pnpm start           # serve a built app
+pnpm check           # lint + types + contract + build
+pnpm prisma migration status</code></pre>
+      </section>
+
+      <section id="next">
+        <h2>4. Practical Next.js implementation</h2>
+        <h3>Example: add an events route</h3>
+        <p>Create <code>src/app/events/page.tsx</code>. Because pages are Server Components by default, this is the natural place to query the database and render a first useful screen.</p>
+        <pre><code>import { db } from "@/../prisma/db";
+
+export default async function EventsPage() {
+  // Start with a query for the current building once auth exists.
+  // The project docs demonstrate the typed .where(...).first() API.
+  const event = await db.orm.public.Event
+    .where({ status: "scheduled" })
+    .first();
+
+  return (
+    &lt;main className="mx-auto w-full max-w-6xl p-6"&gt;
+      &lt;h1 className="text-2xl font-semibold"&gt;Events&lt;/h1&gt;
+      &lt;p className="mt-2 text-muted-foreground"&gt;
+        {event ? `Next booking: ${event.clientName}` : "No scheduled events yet."}
+      &lt;/p&gt;
+    &lt;/main&gt;
+  );
+}</code></pre>
+        <p>In production, replace the placeholder filter with the authenticated admin’s <code>buildingId</code>. Check the generated contract and editor autocomplete for the exact collection operation when expanding from one record to a list.</p>
+        <h3>Example: move metadata from starter text to product text</h3>
+        <p><code>src/app/layout.tsx</code> already owns the shared document shell. Update its metadata as soon as the product name is fixed:</p>
+        <pre><code>export const metadata: Metadata = {
+  title: "Admin Gedung",
+  description: "Manage buildings, users, and event bookings.",
+};</code></pre>
+        <h3>Example: add a client-side filter</h3>
+        <p>Do not turn the whole page into a client component just because a filter is interactive. Extract only the filter:</p>
+        <pre><code>"use client";
+
+import { useState } from "react";
+
+export function EventFilter({ onChange }: { onChange: (value: string) =&gt; void }) {
+  const [value, setValue] = useState("");
+  return (
+    &lt;input
+      value={value}
+      onChange={(e) =&gt; { setValue(e.target.value); onChange(e.target.value); }}
+      placeholder="Search client name"
+      className="rounded-md border px-3 py-2"
+    /&gt;
+  );
+}</code></pre>
+      </section>
+
+      <section id="database">
+        <h2>5. Database workflow</h2>
+        <p><code>prisma/schema.prisma</code> is the domain contract. Current relationships are:</p>
+        <pre><code>User ── optional belongs to ──&gt; Building
+Building ── has many ──&gt; User
+Building ── has many ──&gt; Event
+Event ── belongs to ──&gt; Building</code></pre>
+        <p>The <code>UserRole</code> enum distinguishes <code>SUPER_ADMIN</code> from <code>BUILDING_ADMIN</code>. <code>pinHash</code> indicates that PINs are intended to be stored as hashes, not plaintext; the dependency <code>bcrypt</code> is available for that job.</p>
+        <h3>Safe schema-change loop</h3>
+        <ol class="steps">
+          <li>Edit only <code>prisma/schema.prisma</code>; do not hand-edit generated <code>schema.json</code> or <code>schema.d.ts</code>.</li>
+          <li>Emit the contract with <code>pnpm contract:emit</code>.</li>
+          <li>Apply the appropriate Prisma migration/database command for the development database.</li>
+          <li>Use the typed client from <code>prisma/db.ts</code> in server-side code.</li>
+          <li>Run <code>pnpm check</code> before merging.</li>
+        </ol>
+        <div class="note"><strong>Security boundary:</strong> <code>DATABASE_URL</code> has no <code>NEXT_PUBLIC_</code> prefix, so it must remain server-only. Never send it to a Client Component or expose it in browser code.</div>
+      </section>
+
+      <section id="ui">
+        <h2>6. UI and styling workflow</h2>
+        <p><code>globals.css</code> imports Tailwind 4, animation utilities, and shadcn’s Tailwind layer. It also defines semantic CSS variables such as <code>--primary</code>, <code>--background</code>, and <code>--destructive</code>. Components should use these tokens instead of inventing one-off colors.</p>
+        <p>The existing <code>Button</code> wraps <code>@base-ui/react/button</code> and uses <code>class-variance-authority</code> for variants. A feature should consume it like this:</p>
+        <pre><code>import { Button } from "@/components/ui/button";
+
+&lt;Button variant="default" size="lg"&gt;Create event&lt;/Button&gt;
+&lt;Button variant="outline"&gt;Cancel&lt;/Button&gt;</code></pre>
+        <p><code>src/lib/utils.ts</code> exports <code>cn()</code>, which combines conditional class names and resolves Tailwind conflicts. The <code>@/*</code> alias from <code>tsconfig.json</code> keeps imports stable while folders move.</p>
+      </section>
+
+      <section id="quality">
+        <h2>7. Quality loop</h2>
+        <p>Use a short feedback cycle after every vertical slice:</p>
+        <pre><code># while building
+pnpm dev
+
+# before considering the feature done
+pnpm lint
+pnpm exec tsc --noEmit
+pnpm contract:emit
+pnpm build
+
+# or run the complete gate
+pnpm check</code></pre>
+        <p>Lint catches framework and accessibility issues, TypeScript catches contract mismatches, contract emission catches schema drift, and the production build catches bundling/server-client boundary problems.</p>
+      </section>
+
+      <section id="roadmap">
+        <h2>8. A practical implementation order</h2>
+        <p>The most coherent next milestone is one complete “event management” slice:</p>
+        <ol class="steps">
+          <li><span class="badge">Foundation</span> Replace starter metadata and build a shared admin shell in <code>layout.tsx</code>.</li>
+          <li><span class="badge">Read</span> Add <code>/events</code> and render scheduled events from the typed database client.</li>
+          <li><span class="badge">Auth</span> Implement login with username + PIN verification, hash comparison with bcrypt, and a secure session strategy.</li>
+          <li><span class="badge">Scope</span> Enforce that a <code>BUILDING_ADMIN</code> can read/write only events for its <code>buildingId</code>; keep <code>SUPER_ADMIN</code> cross-building.</li>
+          <li><span class="badge">Write</span> Add a validated create-event form. Validate user input at the boundary with the existing Zod dependency, then persist on the server.</li>
+          <li><span class="badge">Polish</span> Add loading, error, empty, and not-found states for each route, then run <code>pnpm check</code>.</li>
+        </ol>
+        <div class="callout"><strong>Definition of done for the first slice:</strong> an authenticated building admin can open an events page, see only their building’s bookings, create one valid booking, and receive a useful empty/error state when the database is unavailable.</div>
+      </section>
+    </main>
+  </div>
+  <footer>Generated from the repository’s current source files and configuration. Re-check this guide when the app gains authentication, route handlers, or additional models.</footer>
+</body>
+</html>
