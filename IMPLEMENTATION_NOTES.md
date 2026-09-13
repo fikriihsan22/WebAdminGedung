@@ -144,3 +144,23 @@ Acceptance criteria fase 0 terpenuhi: struktur project, command operasional, ass
 ### Open Decisions
 
 - Navigasi hanya menampilkan dashboard yang sudah tersedia. Menu acara dan dashboard lintas gedung akan ditambahkan bersama route nyata pada Fase 5 dan Fase 8, agar tidak menghasilkan link buntu.
+
+## Fase 5 — Daftar Acara Admin Gedung
+
+### Implementasi
+
+- Mengganti halaman dashboard gedung menjadi daftar acara mobile-first, diurutkan berdasarkan tanggal acara terdekat.
+- Menampilkan nama client, tanggal, sesi, status acara, dan status pembayaran pada setiap kartu acara.
+- Menambahkan detail acara baca-saja di `/dashboard/events/[eventId]`.
+- Seluruh daftar dan detail memakai `buildingId` dari sesi server. Detail mencari kombinasi `id` dan `buildingId`, lalu memberikan not-found untuk event gedung lain atau ID tidak valid.
+- Menggunakan empty state pada gedung tanpa acara serta badge status reusable untuk membedakan event aktif/dibatalkan dan status pembayaran.
+
+### Verifikasi
+
+- `pnpm check` berhasil: lint, typecheck, contract generation, dan production build.
+- Query read-only database lokal menunjukkan Gedung Alpha dan Beta masing-masing hanya mengembalikan event miliknya.
+- `git diff --check` berhasil.
+
+### Open Decisions
+
+- Detail tetap read-only dalam Fase 5. Aksi pelunasan dan cancel secara eksplisit ditunda ke Fase 7.

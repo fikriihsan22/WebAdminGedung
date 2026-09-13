@@ -7,15 +7,25 @@ export const formatCurrency = (amount: number) =>
     maximumFractionDigits: 0,
   }).format(amount);
 
-export const formatDate = (value: Date | string) =>
+type DateValue = Date | string | Temporal.Instant;
+
+function toDate(value: DateValue) {
+  if (value instanceof Date) {
+    return value;
+  }
+
+  return new Date(typeof value === "string" ? value : value.epochMilliseconds);
+}
+
+export const formatDate = (value: DateValue) =>
   new Intl.DateTimeFormat(indonesianLocale, {
     day: "2-digit",
     month: "long",
     year: "numeric",
-  }).format(new Date(value));
+  }).format(toDate(value));
 
-export const formatShortDate = (value: Date | string) =>
+export const formatShortDate = (value: DateValue) =>
   new Intl.DateTimeFormat(indonesianLocale, {
     day: "2-digit",
     month: "short",
-  }).format(new Date(value));
+  }).format(toDate(value));
