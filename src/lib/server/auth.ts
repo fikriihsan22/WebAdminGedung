@@ -37,3 +37,13 @@ export async function requireBuildingAccess(buildingId: string) {
 
   return user;
 }
+
+export async function requireBuildingAdmin() {
+  const user = await requireRole("BUILDING_ADMIN");
+
+  if (!user.buildingId) {
+    redirect("/login");
+  }
+
+  return { ...user, buildingId: user.buildingId };
+}

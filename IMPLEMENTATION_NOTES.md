@@ -164,3 +164,25 @@ Acceptance criteria fase 0 terpenuhi: struktur project, command operasional, ass
 ### Open Decisions
 
 - Detail tetap read-only dalam Fase 5. Aksi pelunasan dan cancel secara eksplisit ditunda ke Fase 7.
+
+## Fase 6 — Tambah Acara dan Input Pembayaran Awal
+
+### Implementasi
+
+- Menambahkan halaman dan form `/dashboard/events/new` untuk admin gedung.
+- Form memvalidasi nama client, tanggal, sesi, total tagihan, DP, dan pelunasan opsional pada browser maupun server menggunakan schema Zod yang sama.
+- Gedung dan pembuat acara selalu diambil dari sesi server; keduanya tidak dapat dikirim atau diubah melalui form.
+- Menambahkan fungsi domain tunggal untuk menentukan `UNPAID`, `DP_PAID`, atau `PAID` dari total tagihan, DP, dan pelunasan.
+- Pembuatan acara menggunakan transaction dan mengecek konflik event aktif pada gedung, tanggal, serta sesi yang sama.
+- Tombol submit dinonaktifkan selama penyimpanan dan pengguna diarahkan ke detail acara dengan feedback sukses.
+
+### Verifikasi
+
+- Uji aturan pembayaran mencakup `UNPAID`, `DP_PAID`, dan `PAID`.
+- Uji validasi menolak nama client kosong dan nominal negatif.
+- `pnpm check` berhasil: lint, typecheck, contract generation, dan production build.
+- `git diff --check` berhasil.
+
+### Open Decisions
+
+- `totalAmount` menjadi field wajib pada form, mengikuti schema dan keputusan pembayaran Fase 2 meskipun daftar field lama di execution plan belum mencantumkannya.

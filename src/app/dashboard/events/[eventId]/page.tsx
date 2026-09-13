@@ -8,6 +8,7 @@ import { getBuildingEvent } from "@/lib/server/events";
 
 export default async function EventDetailPage(props: PageProps<"/dashboard/events/[eventId]">) {
   const { eventId } = await props.params;
+  const { created } = await props.searchParams;
   const event = await getBuildingEvent(eventId);
 
   return (
@@ -17,6 +18,7 @@ export default async function EventDetailPage(props: PageProps<"/dashboard/event
         <h1 className="mt-3 text-2xl font-semibold">{event.clientName}</h1>
         <div className="mt-3 flex flex-wrap gap-2"><EventStatusBadge status={event.eventStatus} /><PaymentStatusBadge status={event.paymentStatus} /></div>
       </div>
+      {created === "1" ? <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">Acara berhasil dicatat.</p> : null}
       <Card>
         <CardHeader><h2 className="font-semibold">Informasi acara</h2></CardHeader>
         <CardContent className="grid gap-5 text-sm sm:grid-cols-2">

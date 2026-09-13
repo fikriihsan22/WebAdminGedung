@@ -4,6 +4,7 @@ import { EventSessionLabel } from "@/components/event-session";
 import { EmptyState } from "@/components/states";
 import { EventStatusBadge, PaymentStatusBadge } from "@/components/status-badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 import { formatDate } from "@/lib/format";
 import { requireRole } from "@/lib/server/auth";
 import { listBuildingEvents } from "@/lib/server/events";
@@ -15,9 +16,10 @@ export default async function BuildingDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-sm font-medium text-primary">Acara Gedung</p>
-        <h1 className="mt-1 text-2xl font-semibold">Selamat datang, {user.name}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Jadwal acara terdekat ditampilkan lebih dahulu.</p>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div><p className="text-sm font-medium text-primary">Acara Gedung</p><h1 className="mt-1 text-2xl font-semibold">Selamat datang, {user.name}</h1><p className="mt-2 text-sm text-muted-foreground">Jadwal acara terdekat ditampilkan lebih dahulu.</p></div>
+          <Link className={buttonVariants()} href="/dashboard/events/new">Tambah acara</Link>
+        </div>
       </div>
       {events.length === 0 ? (
         <EmptyState description="Acara yang dicatat untuk gedung Anda akan tampil di sini." title="Belum ada acara" />
