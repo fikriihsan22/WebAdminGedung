@@ -8,9 +8,13 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "check": "pnpm lint && pnpm exec tsc --noEmit && pnpm contract:emit && pnpm build",
+    "typecheck": "next typegen && tsc --noEmit",
+    "check": "pnpm lint && pnpm typecheck && pnpm db:generate && pnpm build",
     "postinstall": "prisma skills sync || exit 0",
-    "contract:emit": "prisma contract emit"
+    "contract:emit": "prisma contract emit",
+    "db:generate": "prisma contract emit",
+    "db:migrate": "prisma db migrate",
+    "db:seed": "node --experimental-strip-types scripts/db-seed.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -29,6 +33,7 @@
     "react-hook-form": "^7.86.0",
     "shadcn": "^4.19.0",
     "tailwind-merge": "^3.6.0",
+    "temporal-polyfill": "^1.0.4",
     "tw-animate-css": "^1.4.0",
     "zod": "^4.4.3"
   },

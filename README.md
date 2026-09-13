@@ -14,7 +14,7 @@ cp .env.example .env
 Set `DATABASE_URL` in `.env` to a development PostgreSQL database, then generate the typed database contract:
 
 ```bash
-pnpm contract:emit
+pnpm db:generate
 ```
 
 Start development:
@@ -28,11 +28,17 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Validation
 
 ```bash
+pnpm lint
+pnpm typecheck
 pnpm check
 pnpm prisma migration status
 ```
 
-`pnpm check` runs linting, TypeScript checking, Prisma contract generation, and a production build. Do not use a production database during local development.
+Database commands are available through `pnpm db:generate`, `pnpm db:migrate`, and `pnpm db:seed`. The development seed creates two buildings, three users, and two events; all development accounts use PIN `123456`. Do not use a production database during local development.
+
+The database client installs the required Temporal polyfill automatically before Prisma queries run. Event timestamps use `Temporal.Instant` in server-side code and seed scripts.
+
+`pnpm check` runs linting, Next.js route type generation, TypeScript checking, Prisma contract generation, and a production build.
 
 <!-- Legacy create-next-app instructions removed; use the setup above. -->
 

@@ -3,25 +3,50 @@
 enum UserRole {
   @@type("pg/text@1")
 
-  SUPER_ADMIN
+  CENTRAL_ADMIN
   BUILDING_ADMIN
 }
 
+enum EventSession {
+  @@type("pg/text@1")
+
+  DAY
+  NIGHT
+}
+
+enum PaymentStatus {
+  @@type("pg/text@1")
+
+  UNPAID
+  DP_PAID
+  PAID
+}
+
+enum EventStatus {
+  @@type("pg/text@1")
+
+  ACTIVE
+  CANCELLED
+}
+
 model User {
-  id         String    @id @default(uuid())
-  username   String    @unique
-  pinHash    String
-  role       UserRole  @default(BUILDING_ADMIN)
-  buildingId String?
-  building   Building? @relation(fields: [buildingId], references: [id])
-  createdAt  DateTime  @default(now())
-  updatedAt  temporal.updatedAt()
+  id            String    @id @default(uuid())
+  name          String
+  username      String    @unique
+  pinHash       String
+  role          UserRole  @default(BUILDING_ADMIN)
+  buildingId    String?
+  building      Building? @relation(fields: [buildingId], references: [id])
+  isActive      Boolean   @default(true)
+  createdEvents Event[]   @relation("EventCreatedBy")
+  createdAt     DateTime  @default(now())
+  updatedAt     temporal.updatedAt()
 }
 
 model Building {
   id        String   @id @default(uuid())
   name      String
-  location  String?
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt temporal.updatedAt()
   users     User[]
@@ -29,15 +54,22 @@ model Building {
 }
 
 model Event {
-  id              String   @id @default(uuid())
-  clientName      String
-  eventDate       DateTime
-  session         String
-  dpAmount        Int      @default(0)
-  remainingAmount Int      @default(0)
-  status          String   @default("scheduled")
-  buildingId      String
-  building        Building @relation(fields: [buildingId], references: [id])
-  createdAt       DateTime @default(now())
-  updatedAt       temporal.updatedAt()
+  id            String        @id @default(uuid())
+  buildingId    String
+  building      Building      @relation(fields: [buildingId], references: [id])
+  clientName    String
+  eventDate     DateTime
+  session       EventSession
+  totalAmount   Int
+  downPayment   Int           @default(0)
+  finalPayment  Int           @default(0)
+  paymentStatus PaymentStatus @default(UNPAID)
+  eventStatus   EventStatus   @default(ACTIVE)
+  createdById   String
+  createdBy     User          @relation("EventCreatedBy", fields: [createdById], references: [id])
+  cancelReason  String?
+  createdAt     DateTime      @default(now())
+  updatedAt     temporal.updatedAt()
+
+  @@unique([buildingId, eventDate, session, eventStatus])
 }

@@ -21,12 +21,55 @@
     "namespaces": {
       "public": {
         "enum": {
+          "EventSession": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "DAY",
+                "value": "DAY"
+              },
+              {
+                "name": "NIGHT",
+                "value": "NIGHT"
+              }
+            ]
+          },
+          "EventStatus": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "ACTIVE",
+                "value": "ACTIVE"
+              },
+              {
+                "name": "CANCELLED",
+                "value": "CANCELLED"
+              }
+            ]
+          },
+          "PaymentStatus": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "UNPAID",
+                "value": "UNPAID"
+              },
+              {
+                "name": "DP_PAID",
+                "value": "DP_PAID"
+              },
+              {
+                "name": "PAID",
+                "value": "PAID"
+              }
+            ]
+          },
           "UserRole": {
             "codecId": "pg/text@1",
             "members": [
               {
-                "name": "SUPER_ADMIN",
-                "value": "SUPER_ADMIN"
+                "name": "CENTRAL_ADMIN",
+                "value": "CENTRAL_ADMIN"
               },
               {
                 "name": "BUILDING_ADMIN",
@@ -52,10 +95,10 @@
                   "kind": "scalar"
                 }
               },
-              "location": {
-                "nullable": true,
+              "isActive": {
+                "nullable": false,
                 "type": {
-                  "codecId": "pg/text@1",
+                  "codecId": "pg/bool@1",
                   "kind": "scalar"
                 }
               },
@@ -114,8 +157,8 @@
                 "id": {
                   "column": "id"
                 },
-                "location": {
-                  "column": "location"
+                "isActive": {
+                  "column": "isActive"
                 },
                 "name": {
                   "column": "name"
@@ -137,6 +180,13 @@
                   "kind": "scalar"
                 }
               },
+              "cancelReason": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "clientName": {
                 "nullable": false,
                 "type": {
@@ -151,7 +201,14 @@
                   "kind": "scalar"
                 }
               },
-              "dpAmount": {
+              "createdById": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "downPayment": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/int4@1",
@@ -165,6 +222,26 @@
                   "kind": "scalar"
                 }
               },
+              "eventStatus": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "EventStatus",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
+              "finalPayment": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -172,11 +249,17 @@
                   "kind": "scalar"
                 }
               },
-              "remainingAmount": {
+              "paymentStatus": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/int4@1",
+                  "codecId": "pg/text@1",
                   "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "PaymentStatus",
+                  "namespaceId": "public",
+                  "plane": "domain"
                 }
               },
               "session": {
@@ -184,12 +267,18 @@
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "EventSession",
+                  "namespaceId": "public",
+                  "plane": "domain"
                 }
               },
-              "status": {
+              "totalAmount": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/text@1",
+                  "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               },
@@ -216,6 +305,21 @@
                   "model": "Building",
                   "namespace": "public"
                 }
+              },
+              "createdBy": {
+                "cardinality": "N:1",
+                "on": {
+                  "localFields": [
+                    "createdById"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -223,29 +327,41 @@
                 "buildingId": {
                   "column": "buildingId"
                 },
+                "cancelReason": {
+                  "column": "cancelReason"
+                },
                 "clientName": {
                   "column": "clientName"
                 },
                 "createdAt": {
                   "column": "createdAt"
                 },
-                "dpAmount": {
-                  "column": "dpAmount"
+                "createdById": {
+                  "column": "createdById"
+                },
+                "downPayment": {
+                  "column": "downPayment"
                 },
                 "eventDate": {
                   "column": "eventDate"
                 },
+                "eventStatus": {
+                  "column": "eventStatus"
+                },
+                "finalPayment": {
+                  "column": "finalPayment"
+                },
                 "id": {
                   "column": "id"
                 },
-                "remainingAmount": {
-                  "column": "remainingAmount"
+                "paymentStatus": {
+                  "column": "paymentStatus"
                 },
                 "session": {
                   "column": "session"
                 },
-                "status": {
-                  "column": "status"
+                "totalAmount": {
+                  "column": "totalAmount"
                 },
                 "updatedAt": {
                   "column": "updatedAt"
@@ -272,6 +388,20 @@
                 }
               },
               "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "isActive": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
@@ -328,6 +458,21 @@
                   "model": "Building",
                   "namespace": "public"
                 }
+              },
+              "createdEvents": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "createdById"
+                  ]
+                },
+                "to": {
+                  "model": "Event",
+                  "namespace": "public"
+                }
               }
             },
             "storage": {
@@ -340,6 +485,12 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "isActive": {
+                  "column": "isActive"
+                },
+                "name": {
+                  "column": "name"
                 },
                 "pinHash": {
                   "column": "pinHash"
@@ -383,10 +534,14 @@
                   "nativeType": "text",
                   "nullable": false
                 },
-                "location": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
+                "isActive": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
                 },
                 "name": {
                   "codecId": "pg/text@1",
@@ -409,11 +564,33 @@
               "uniques": []
             },
             "event": {
+              "checks": [
+                {
+                  "expression": "\"eventStatus\" IN ('ACTIVE', 'CANCELLED')",
+                  "name": "event_eventStatus_check_3f65f91a",
+                  "prefix": "event_eventStatus_check"
+                },
+                {
+                  "expression": "\"paymentStatus\" IN ('UNPAID', 'DP_PAID', 'PAID')",
+                  "name": "event_paymentStatus_check_a9c6c3c7",
+                  "prefix": "event_paymentStatus_check"
+                },
+                {
+                  "expression": "\"session\" IN ('DAY', 'NIGHT')",
+                  "name": "event_session_check_7e3744a6",
+                  "prefix": "event_session_check"
+                }
+              ],
               "columns": {
                 "buildingId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "cancelReason": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
                 },
                 "clientName": {
                   "codecId": "pg/text@1",
@@ -429,7 +606,12 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
-                "dpAmount": {
+                "createdById": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "downPayment": {
                   "codecId": "pg/int4@1",
                   "default": {
                     "kind": "literal",
@@ -443,12 +625,22 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
-                "id": {
+                "eventStatus": {
                   "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "ACTIVE"
+                  },
                   "nativeType": "text",
-                  "nullable": false
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "EventStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
                 },
-                "remainingAmount": {
+                "finalPayment": {
                   "codecId": "pg/int4@1",
                   "default": {
                     "kind": "literal",
@@ -457,18 +649,40 @@
                   "nativeType": "int4",
                   "nullable": false
                 },
-                "session": {
+                "id": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
                 },
-                "status": {
+                "paymentStatus": {
                   "codecId": "pg/text@1",
                   "default": {
                     "kind": "literal",
-                    "value": "scheduled"
+                    "value": "UNPAID"
                   },
                   "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "PaymentStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "session": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "EventSession",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
+                "totalAmount": {
+                  "codecId": "pg/int4@1",
+                  "nativeType": "int4",
                   "nullable": false
                 },
                 "updatedAt": {
@@ -493,6 +707,22 @@
                     "namespaceId": "public",
                     "tableName": "building"
                   }
+                },
+                {
+                  "source": {
+                    "columns": [
+                      "createdById"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "event"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
                 }
               ],
               "indexes": [
@@ -503,6 +733,14 @@
                   "name": "event_buildingId_idx_c40fd7b4",
                   "prefix": "event_buildingId_idx",
                   "unique": false
+                },
+                {
+                  "columns": [
+                    "createdById"
+                  ],
+                  "name": "event_createdById_idx_8bf640ed",
+                  "prefix": "event_createdById_idx",
+                  "unique": false
                 }
               ],
               "primaryKey": {
@@ -510,13 +748,22 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "buildingId",
+                    "eventDate",
+                    "session",
+                    "eventStatus"
+                  ]
+                }
+              ]
             },
             "user": {
               "checks": [
                 {
-                  "expression": "\"role\" IN ('SUPER_ADMIN', 'BUILDING_ADMIN')",
-                  "name": "user_role_check_f0242dd6",
+                  "expression": "\"role\" IN ('CENTRAL_ADMIN', 'BUILDING_ADMIN')",
+                  "name": "user_role_check_1f61922c",
                   "prefix": "user_role_check"
                 }
               ],
@@ -536,6 +783,20 @@
                   "nullable": false
                 },
                 "id": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "isActive": {
+                  "codecId": "pg/bool@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": true
+                  },
+                  "nativeType": "bool",
+                  "nullable": false
+                },
+                "name": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
@@ -614,10 +875,32 @@
             }
           },
           "valueSet": {
+            "EventSession": {
+              "kind": "valueSet",
+              "values": [
+                "DAY",
+                "NIGHT"
+              ]
+            },
+            "EventStatus": {
+              "kind": "valueSet",
+              "values": [
+                "ACTIVE",
+                "CANCELLED"
+              ]
+            },
+            "PaymentStatus": {
+              "kind": "valueSet",
+              "values": [
+                "UNPAID",
+                "DP_PAID",
+                "PAID"
+              ]
+            },
             "UserRole": {
               "kind": "valueSet",
               "values": [
-                "SUPER_ADMIN",
+                "CENTRAL_ADMIN",
                 "BUILDING_ADMIN"
               ]
             }
@@ -627,7 +910,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "4bf8cde2972850dd3eede1d494e1da1f9d6eff5f0ed832a8099c937d32fc0c08"
+    "storageHash": "67c99ae905eaa5326c284502bd81ff53ebbb3dd77c1f66e10c31f8d77bd1740e"
   },
   "execution": {
     "executionHash": "6e620dcf67a7e6f5c1b12fd7dd0b972022ccc1307dc2da16e95180cd65ccc42e",
