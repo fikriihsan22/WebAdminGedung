@@ -31,7 +31,7 @@ Open [http://localhost:3000](http://localhost:3000).
 pnpm lint
 pnpm typecheck
 pnpm check
-pnpm prisma migration status
+pnpm exec prisma migration status
 ```
 
 Database commands are available through `pnpm db:generate`, `pnpm db:migrate`, and `pnpm db:seed`. The development seed creates two buildings, three users, and two events; all development accounts use PIN `123456`. Do not use a production database during local development.
@@ -39,6 +39,21 @@ Database commands are available through `pnpm db:generate`, `pnpm db:migrate`, a
 The database client installs the required Temporal polyfill automatically before Prisma queries run. Event timestamps use `Temporal.Instant` in server-side code and seed scripts.
 
 `pnpm check` runs linting, Next.js route type generation, TypeScript checking, Prisma contract generation, and a production build.
+
+## End-to-end testing
+
+The E2E suite uses Playwright against a production build on port `3001`. It uses the development seed accounts and creates only events whose client name starts with `E2E Test `; those events are removed automatically after every scenario.
+
+```bash
+pnpm db:seed
+pnpm test
+```
+
+The test command explicitly enables development-database access. Never run it with a production `DATABASE_URL`.
+
+## Deployment readiness
+
+Before deployment, configure `DATABASE_URL` for the target environment, run `pnpm db:migrate` through the deployment pipeline, and verify it with `pnpm exec prisma db verify`. Create operational accounts outside the development seed, rotate the documented development PIN, and keep the deployment database separate from local development and E2E testing.
 
 <!-- Legacy create-next-app instructions removed; use the setup above. -->
 

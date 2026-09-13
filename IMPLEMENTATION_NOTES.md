@@ -250,3 +250,22 @@ Acceptance criteria fase 0 terpenuhi: struktur project, command operasional, ass
 ### Open Decisions
 
 - Rate limit login memakai memori proses dan cukup untuk satu instance MVP. Saat deployment memakai beberapa instance atau membutuhkan proteksi lintas restart, pindahkan counter ke penyimpanan bersama seperti Redis atau database dengan TTL.
+
+## Fase 10 — Testing End-to-End dan Release Readiness
+
+### Implementasi
+
+- Menambahkan Playwright dengan Chromium dan script `pnpm test` untuk menjalankan E2E terhadap production build lokal.
+- Menambahkan skenario autentikasi, isolasi akses gedung, lifecycle event, konflik slot aktif, dashboard pusat, dan pembatasan mutation admin pusat.
+- Event E2E diberi prefix `E2E Test ` dan dihapus otomatis setelah setiap skenario; akses database test hanya diaktifkan oleh script E2E.
+- Memperbarui README untuk command status migration, E2E, dan checklist deployment.
+
+### Verifikasi
+
+- `pnpm test` berhasil menjalankan empat skenario Chromium terhadap production build lokal.
+- Seluruh event dengan prefix `E2E Test ` dibersihkan setelah suite selesai.
+- `pnpm check`, pemeriksaan graph migration, dan verifikasi database dijalankan pada Fase 10.
+
+### Open Decisions
+
+- Target deployment dan database staging belum dipilih. Sebelum rilis production, tentukan environment target dan jalankan migration melalui pipeline deployment, bukan database development.

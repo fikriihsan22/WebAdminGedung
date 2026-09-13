@@ -14,7 +14,9 @@
     "contract:emit": "prisma contract emit",
     "db:generate": "prisma contract emit",
     "db:migrate": "prisma db migrate",
-    "db:seed": "node --experimental-strip-types scripts/db-seed.ts"
+    "db:seed": "node --experimental-strip-types scripts/db-seed.ts",
+    "test": "pnpm test:e2e",
+    "test:e2e": "E2E_ALLOW_DATABASE=1 playwright test"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -38,6 +40,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@prisma/cli-engine": "0.2.3",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
