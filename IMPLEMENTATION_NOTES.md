@@ -210,3 +210,23 @@ Acceptance criteria fase 0 terpenuhi: struktur project, command operasional, ass
 ### Open Decisions
 
 - Slot setelah cancel dapat digunakan ulang, dan histori cancel lebih dari satu dipertahankan, sesuai keputusan bisnis yang disetujui.
+
+## Fase 8 — Dashboard Admin Pusat
+
+### Implementasi
+
+- Mengganti placeholder dashboard pusat dengan summary lintas gedung, daftar event, dan ringkasan per gedung yang bersifat read-only.
+- Menambahkan filter GET untuk gedung, rentang tanggal, sesi, status acara, dan status pembayaran.
+- Semua summary dan daftar event dihitung dari query filter yang sama.
+- Menambahkan dua index event untuk pola query dashboard: gedung–tanggal serta tanggal–sesi–status.
+- Menambahkan migration `20260913T1057_add_event_dashboard_indexes` dan memperbarui referensi graph migrasi.
+
+### Verifikasi
+
+- Migration index berhasil diterapkan dan `prisma db verify` menyatakan schema sesuai contract.
+- Uji query read-only memastikan hasil Gedung Alpha hanya berisi event Alpha dan total status konsisten dengan total event.
+- `pnpm check` dan `git diff --check` berhasil.
+
+### Open Decisions
+
+- Tidak ada. Dashboard pusat tetap tidak menyediakan mutation.

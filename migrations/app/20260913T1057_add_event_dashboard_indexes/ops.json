@@ -1,0 +1,80 @@
+[
+  {
+    "id": "index.event.event_buildingId_eventDate_idx_aa856c4a",
+    "label": "Create index \"event_buildingId_eventDate_idx_aa856c4a\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "event_buildingId_eventDate_idx_aa856c4a",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"event_buildingId_eventDate_idx_aa856c4a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_buildingId_eventDate_idx_aa856c4a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"event_buildingId_eventDate_idx_aa856c4a\"",
+        "sql": "CREATE INDEX \"event_buildingId_eventDate_idx_aa856c4a\" ON \"public\".\"event\" (\"buildingId\", \"eventDate\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"event_buildingId_eventDate_idx_aa856c4a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_buildingId_eventDate_idx_aa856c4a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.event.event_eventDate_session_eventStatus_paymentStatus_idx_a6d3c5fb",
+    "label": "Create index \"event_eventDate_session_eventStatus_paymentStatus_idx_a6d3c5fb\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "event_eventDate_session_eventStatus_paymentStatus_idx_a6d3c5fb",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"event_eventDate_session_eventStatus_paymentStatus_idx_a6d3c5fb\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_eventDate_session_eventStatus_paymentStatus_idx_a6d3c5fb\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"event_eventDate_session_eventStatus_paymentStatus_idx_a6d3c5fb\"",
+        "sql": "CREATE INDEX \"event_eventDate_session_eventStatus_paymentStatus_idx_a6d3c5fb\" ON \"public\".\"event\" (\"eventDate\", \"session\", \"eventStatus\", \"paymentStatus\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"event_eventDate_session_eventStatus_paymentStatus_idx_a6d3c5fb\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_eventDate_session_eventStatus_paymentStatus_idx_a6d3c5fb\""
+        ]
+      }
+    ]
+  }
+]

@@ -81,4 +81,6 @@ model Event {
   createdAt     DateTime      @default(now())
   updatedAt     temporal.updatedAt()
 
+  @@index([buildingId, eventDate])
+  @@index([eventDate, session, eventStatus, paymentStatus])
 }
