@@ -98,3 +98,29 @@ Acceptance criteria fase 0 terpenuhi: struktur project, command operasional, ass
 - Prisma membutuhkan `temporal-polyfill` pada Node yang belum menyediakan `Temporal`; polyfill sekarang dimuat sebelum database client dibuat.
 - Nilai `eventDate` pada seed menggunakan `Temporal.Instant`, sesuai codec Prisma Next untuk PostgreSQL `timestamptz`.
 - `pnpm exec prisma db verify` menyatakan marker dan schema database cocok dengan contract Fase 2.
+
+## Fase 3 — Auth, Session, dan Guard Dasar
+
+### Implementasi
+
+- Menambahkan model `Session` yang terhubung ke `User`, dengan token hash unik dan masa berlaku 30 hari.
+- Login menggunakan username dan PIN bcrypt, mengembalikan pesan generik untuk kredensial salah maupun akun nonaktif.
+- Token sesi acak hanya disimpan sebagai hash SHA-256 di database; cookie berisi token opaque dengan `httpOnly`, `sameSite=lax`, `secure` pada production, dan path `/`.
+- Menambahkan logout yang menghapus sesi database saat ini dan cookie browser.
+- Menambahkan helper server-side `requireUser`, `requireRole`, dan `requireBuildingAccess` untuk proteksi route dan isolasi gedung.
+- Route `/` mengarahkan pengguna ke `/login`, `/dashboard`, atau `/central` berdasarkan sesi dan peran; dashboard pusat tidak menyediakan mutation pada fase ini.
+- Membuat migration `20260913T0706_add_server_sessions` dengan empat operasi additive.
+
+### Verifikasi
+
+- `pnpm exec prisma migration check` berhasil.
+- `pnpm db:migrate` menerapkan satu migration sesi.
+- `pnpm exec prisma db verify` berhasil dan menyatakan schema database sesuai contract.
+- `pnpm check` berhasil: lint, typecheck, contract generation, dan production build.
+- Halaman `/login` pada server lokal merespons `200 OK` serta memuat field username dan PIN.
+
+### Open Decisions
+
+- Tidak ada signup mandiri: akun tetap dibuat dan dikelola admin, sesuai scope MVP.
+- Sesi memakai hash token opaque, sehingga tidak memerlukan `SESSION_SECRET`; secret baru diperlukan bila kelak menggunakan token yang ditandatangani atau cookie terenkripsi sendiri.
+- Helper `requireBuildingAccess` siap dipakai pada route/mutation event Fase 5; belum ada halaman atau mutation event pada Fase 3 untuk diuji melalui UI.
