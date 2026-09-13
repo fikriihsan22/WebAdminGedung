@@ -1,21 +1,13 @@
-import { LogoutButton } from "@/components/logout-button";
+import { EmptyState } from "@/components/states";
 import { requireRole } from "@/lib/server/auth";
 
 export default async function BuildingDashboardPage() {
   const user = await requireRole("BUILDING_ADMIN");
 
   return (
-    <main className="min-h-screen bg-muted/40 px-5 py-10 sm:px-8">
-      <div className="mx-auto max-w-5xl rounded-xl border bg-background p-6 shadow-sm">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-primary">Dashboard Gedung</p>
-            <h1 className="mt-2 text-2xl font-semibold">Selamat datang, {user.name}</h1>
-            <p className="mt-2 text-sm text-muted-foreground">Akses gedung Anda telah diamankan melalui sesi login.</p>
-          </div>
-          <LogoutButton />
-        </div>
-      </div>
-    </main>
+    <div className="space-y-6">
+      <div><p className="text-sm font-medium text-primary">Dashboard Gedung</p><h1 className="mt-1 text-2xl font-semibold">Selamat datang, {user.name}</h1><p className="mt-2 text-sm text-muted-foreground">Daftar acara gedung akan tersedia pada fase berikutnya.</p></div>
+      <EmptyState description="Belum ada ringkasan acara yang dapat ditampilkan." title="Acara Anda akan tampil di sini" />
+    </div>
   );
 }

@@ -124,3 +124,23 @@ Acceptance criteria fase 0 terpenuhi: struktur project, command operasional, ass
 - Tidak ada signup mandiri: akun tetap dibuat dan dikelola admin, sesuai scope MVP.
 - Sesi memakai hash token opaque, sehingga tidak memerlukan `SESSION_SECRET`; secret baru diperlukan bila kelak menggunakan token yang ditandatangani atau cookie terenkripsi sendiri.
 - Helper `requireBuildingAccess` siap dipakai pada route/mutation event Fase 5; belum ada halaman atau mutation event pada Fase 3 untuk diuji melalui UI.
+
+## Fase 4 — Shared UI dan Navigation
+
+### Implementasi
+
+- Menambahkan `AppShell` responsif dengan sidebar ringkas pada desktop dan bottom navigation pada mobile.
+- Menampilkan nama pengguna, role, dan konteks gedung (atau semua gedung bagi admin pusat) di header.
+- Navigasi hanya menampilkan tujuan yang dapat diakses oleh peran aktif.
+- Menambahkan komponen reusable: `Card`, `Input`, `Select`, status badge acara/pembayaran, empty state, loading state, error state, dan confirmation dialog.
+- Menambahkan format tanggal serta mata uang Rupiah berbasis locale `id-ID`.
+- Menambahkan loading dan error boundary untuk dashboard gedung maupun pusat.
+
+### Verifikasi
+
+- `pnpm typecheck` berhasil.
+- `pnpm lint` berhasil.
+
+### Open Decisions
+
+- Navigasi hanya menampilkan dashboard yang sudah tersedia. Menu acara dan dashboard lintas gedung akan ditambahkan bersama route nyata pada Fase 5 dan Fase 8, agar tidak menghasilkan link buntu.
