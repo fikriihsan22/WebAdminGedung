@@ -83,4 +83,5 @@ model Event {
 
   @@index([buildingId, eventDate])
   @@index([eventDate, session, eventStatus, paymentStatus])
+  @@index([buildingId, eventDate, session], where: "(\"eventStatus\" = 'ACTIVE')", unique: true, name: "event_active_slot")
 }

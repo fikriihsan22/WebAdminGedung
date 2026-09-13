@@ -1,0 +1,41 @@
+[
+  {
+    "id": "index.event.event_active_slot_d8db796a",
+    "label": "Create index \"event_active_slot_d8db796a\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "event_active_slot_d8db796a",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"event_active_slot_d8db796a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_active_slot_d8db796a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"event_active_slot_d8db796a\"",
+        "sql": "CREATE UNIQUE INDEX \"event_active_slot_d8db796a\" ON \"public\".\"event\" (\"buildingId\", \"eventDate\", \"session\") WHERE ((\"eventStatus\" = 'ACTIVE'))",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"event_active_slot_d8db796a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_active_slot_d8db796a\""
+        ]
+      }
+    ]
+  }
+]

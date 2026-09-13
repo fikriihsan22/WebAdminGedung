@@ -230,3 +230,23 @@ Acceptance criteria fase 0 terpenuhi: struktur project, command operasional, ass
 ### Open Decisions
 
 - Tidak ada. Dashboard pusat tetap tidak menyediakan mutation.
+
+## Fase 9 — Security dan Quality Hardening
+
+### Implementasi
+
+- Menambahkan indeks unik parsial untuk slot event `ACTIVE` berdasarkan gedung, tanggal, dan sesi. Histori event `CANCELLED` tetap dapat lebih dari satu dan slot dapat dipakai kembali setelah cancel.
+- Menangani konflik indeks saat pembuatan event sebagai pesan validasi yang ramah pengguna, termasuk pada request yang berjalan bersamaan.
+- Memperketat validasi form event: nominal wajib tidak lagi mengubah input kosong menjadi `0`, dan tanggal harus merupakan tanggal kalender yang valid.
+- Menambahkan rate limit login dalam memori: lima kegagalan per username dalam 15 menit, lalu percobaan berikutnya ditolak sementara. Login berhasil menghapus penghitung kegagalan.
+- Menjadikan helper data dashboard pusat melakukan verifikasi peran `CENTRAL_ADMIN` sendiri, selain proteksi route yang sudah ada.
+- Menambahkan migration `20260913T1115_enforce_active_event_slot` dan memperbarui referensi graph migrasi.
+
+### Verifikasi
+
+- Migration indeks unik parsial berhasil diterapkan ke database development.
+- Verifikasi database, pemeriksaan graph migrasi, uji rollback konflik slot aktif, serta `pnpm check` dijalankan pada Fase 9.
+
+### Open Decisions
+
+- Rate limit login memakai memori proses dan cukup untuk satu instance MVP. Saat deployment memakai beberapa instance atau membutuhkan proteksi lintas restart, pindahkan counter ke penyimpanan bersama seperti Redis atau database dengan TTL.

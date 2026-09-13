@@ -47,3 +47,7 @@ export async function requireBuildingAdmin() {
 
   return { ...user, buildingId: user.buildingId };
 }
+
+export async function requireCentralAdmin() {
+  return requireRole("CENTRAL_ADMIN");
+}

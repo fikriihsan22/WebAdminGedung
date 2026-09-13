@@ -4,12 +4,12 @@ import { EmptyState } from "@/components/states";
 import { EventStatusBadge, PaymentStatusBadge } from "@/components/status-badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { requireRole } from "@/lib/server/auth";
+import { requireCentralAdmin } from "@/lib/server/auth";
 import { getCentralDashboard } from "@/lib/server/central-dashboard";
 import { parseCentralDashboardFilters } from "@/validation/dashboard";
 
 export default async function CentralDashboardPage(props: PageProps<"/central">) {
-  const user = await requireRole("CENTRAL_ADMIN");
+  const user = await requireCentralAdmin();
   const filters = parseCentralDashboardFilters(await props.searchParams);
   const dashboard = await getCentralDashboard(filters);
 

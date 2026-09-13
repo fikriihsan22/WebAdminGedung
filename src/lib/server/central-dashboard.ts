@@ -1,6 +1,7 @@
 import "server-only";
 
 import { db } from "@/../prisma/db";
+import { requireCentralAdmin } from "@/lib/server/auth";
 import type { CentralDashboardFilters } from "@/validation/dashboard";
 
 function dateStart(value: string) {
@@ -12,6 +13,8 @@ function dateEnd(value: string) {
 }
 
 export async function getCentralDashboard(filters: CentralDashboardFilters) {
+  await requireCentralAdmin();
+
   let eventsQuery = db.orm.public.Event;
 
   if (filters.buildingId) eventsQuery = eventsQuery.where({ buildingId: filters.buildingId });
