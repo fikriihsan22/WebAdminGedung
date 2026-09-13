@@ -23,3 +23,11 @@ export function eventFormData(formData: FormData) {
     finalPayment: formData.get("finalPayment"),
   };
 }
+
+export const finalPaymentSchema = z.object({
+  finalPayment: z.preprocess((value) => (value === "" || value === null ? undefined : value), moneyInput),
+});
+
+export const cancelEventSchema = z.object({
+  eventId: z.string().uuid(),
+});

@@ -9,7 +9,7 @@ type ConfirmationDialogProps = {
   title: string;
   description: string;
   confirmLabel: string;
-  onConfirm?: () => void;
+  onConfirm?: () => void | Promise<void>;
 };
 
 export function ConfirmationDialog({ triggerLabel, title, description, confirmLabel, onConfirm }: ConfirmationDialogProps) {
@@ -27,8 +27,8 @@ export function ConfirmationDialog({ triggerLabel, title, description, confirmLa
           <div className="mt-6 flex justify-end gap-2">
             <Button onClick={() => dialogRef.current?.close()} type="button" variant="outline">Batal</Button>
             <Button
-              onClick={() => {
-                onConfirm?.();
+              onClick={async () => {
+                await onConfirm?.();
                 dialogRef.current?.close();
               }}
               type="button"

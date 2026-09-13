@@ -186,3 +186,27 @@ Acceptance criteria fase 0 terpenuhi: struktur project, command operasional, ass
 ### Open Decisions
 
 - `totalAmount` menjadi field wajib pada form, mengikuti schema dan keputusan pembayaran Fase 2 meskipun daftar field lama di execution plan belum mencantumkannya.
+
+## Fase 7 — Detail Acara, Pelunasan, dan Cancel
+
+### Implementasi
+
+- Menambahkan form pelunasan pada detail event aktif. Nilainya merupakan nilai pelunasan akhir tunggal, lalu status pembayaran dihitung ulang secara atomik.
+- Menolak pelunasan pada event yang telah dibatalkan.
+- Menambahkan cancel dengan confirmation dialog; cancel mengubah status menjadi `CANCELLED` tanpa menghapus event atau nominal pembayaran.
+- Cancel berulang aman dan memberi feedback bahwa event sudah dibatalkan.
+- Detail, pembayaran, dan cancel selalu mengambil event dengan kombinasi ID event dan `buildingId` dari sesi server.
+- Menghapus unique constraint yang sebelumnya membatasi histori cancelled; event aktif tetap dicek di transaction saat dibuat, sehingga slot dapat digunakan ulang setelah cancel dan beberapa histori cancelled tetap tersimpan.
+- Memperbaiki referensi graph migrasi agar contract sesi Fase 3 menjadi titik awal migration Fase 7.
+
+### Verifikasi
+
+- `pnpm exec prisma migration check` berhasil.
+- Migration `20260913T1041_allow_cancelled_event_history` berhasil diterapkan dan database terverifikasi sesuai contract.
+- Uji transaction rollback membuktikan dua event cancelled pada slot yang sama dapat dibuat tanpa meninggalkan data uji.
+- Uji validasi pelunasan dan perhitungan status pembayaran berhasil.
+- `pnpm check` dan `git diff --check` berhasil.
+
+### Open Decisions
+
+- Slot setelah cancel dapat digunakan ulang, dan histori cancel lebih dari satu dipertahankan, sesuai keputusan bisnis yang disetujui.

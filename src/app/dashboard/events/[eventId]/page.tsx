@@ -6,9 +6,11 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { getBuildingEvent } from "@/lib/server/events";
 
+import { EventActions } from "./event-actions";
+
 export default async function EventDetailPage(props: PageProps<"/dashboard/events/[eventId]">) {
   const { eventId } = await props.params;
-  const { created } = await props.searchParams;
+  const { created, settled, cancelled } = await props.searchParams;
   const event = await getBuildingEvent(eventId);
 
   return (
@@ -19,6 +21,9 @@ export default async function EventDetailPage(props: PageProps<"/dashboard/event
         <div className="mt-3 flex flex-wrap gap-2"><EventStatusBadge status={event.eventStatus} /><PaymentStatusBadge status={event.paymentStatus} /></div>
       </div>
       {created === "1" ? <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">Acara berhasil dicatat.</p> : null}
+      {settled === "1" ? <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">Pelunasan berhasil diperbarui.</p> : null}
+      {cancelled === "1" ? <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">Acara berhasil dibatalkan.</p> : null}
+      {cancelled === "already" ? <p className="rounded-lg border bg-muted px-4 py-3 text-sm text-muted-foreground" role="status">Acara ini sudah dibatalkan sebelumnya.</p> : null}
       <Card>
         <CardHeader><h2 className="font-semibold">Informasi acara</h2></CardHeader>
         <CardContent className="grid gap-5 text-sm sm:grid-cols-2">
@@ -29,7 +34,7 @@ export default async function EventDetailPage(props: PageProps<"/dashboard/event
           <DetailItem label="Pelunasan" value={formatCurrency(event.finalPayment)} />
         </CardContent>
       </Card>
-      <p className="text-sm text-muted-foreground">Halaman ini bersifat baca saja. Pelunasan dan pembatalan acara tersedia pada Fase 7.</p>
+      {event.eventStatus === "ACTIVE" ? <EventActions eventId={event.id} finalPayment={event.finalPayment} /> : <p className="text-sm text-muted-foreground">Acara yang dibatalkan tidak dapat menerima pelunasan baru.</p>}
     </div>
   );
 }

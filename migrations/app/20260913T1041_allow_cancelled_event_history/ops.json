@@ -1,0 +1,44 @@
+[
+  {
+    "id": "dropConstraint.event.event_buildingId_eventDate_session_eventStatus_key",
+    "label": "Drop constraint \"event_buildingId_eventDate_session_eventStatus_key\" on \"event\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "event_buildingId_eventDate_session_eventStatus_key",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"event_buildingId_eventDate_session_eventStatus_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_buildingId_eventDate_session_eventStatus_key",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop constraint \"event_buildingId_eventDate_session_eventStatus_key\"",
+        "sql": "ALTER TABLE \"public\".\"event\" DROP CONSTRAINT \"event_buildingId_eventDate_session_eventStatus_key\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"event_buildingId_eventDate_session_eventStatus_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_buildingId_eventDate_session_eventStatus_key",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ]
+  }
+]
