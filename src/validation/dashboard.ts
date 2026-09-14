@@ -8,7 +8,7 @@ export const centralDashboardFiltersSchema = z.object({
   startDate: optionalDate,
   endDate: optionalDate,
   session: z.preprocess((value) => (value === "" ? undefined : value), z.enum(["DAY", "NIGHT"]).optional()),
-  eventStatus: z.preprocess((value) => (value === "" ? undefined : value), z.enum(["ACTIVE", "CANCELLED"]).optional()),
+  eventStatus: z.preprocess((value) => (value === "" ? undefined : value), z.enum(["ACTIVE", "COMPLETED", "CANCELLED"]).optional()),
   paymentStatus: z.preprocess((value) => (value === "" ? undefined : value), z.enum(["UNPAID", "DP_PAID", "PAID"]).optional()),
 });
 

@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
 
-type EventStatus = "ACTIVE" | "CANCELLED";
+type EventStatus = "ACTIVE" | "COMPLETED" | "CANCELLED";
 type PaymentStatus = "UNPAID" | "DP_PAID" | "PAID";
 
 const eventStatusConfig: Record<EventStatus, { label: string; className: string }> = {
   ACTIVE: { label: "Aktif", className: "bg-emerald-100 text-emerald-800" },
+  COMPLETED: { label: "Selesai", className: "bg-sky-100 text-sky-800" },
   CANCELLED: { label: "Dibatalkan", className: "bg-rose-100 text-rose-800" },
 };
 

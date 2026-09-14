@@ -17,7 +17,7 @@ export function CentralFilters({ buildings, filters }: CentralFiltersProps) {
       <Input defaultValue={filters.startDate ?? ""} name="startDate" type="date" />
       <Input defaultValue={filters.endDate ?? ""} name="endDate" type="date" />
       <Select defaultValue={filters.session ?? ""} name="session"><option value="">Semua sesi</option><option value="DAY">Siang</option><option value="NIGHT">Malam</option></Select>
-      <Select defaultValue={filters.eventStatus ?? ""} name="eventStatus"><option value="">Semua status acara</option><option value="ACTIVE">Aktif</option><option value="CANCELLED">Dibatalkan</option></Select>
+      <Select defaultValue={filters.eventStatus ?? ""} name="eventStatus"><option value="">Semua status acara</option><option value="ACTIVE">Aktif</option><option value="COMPLETED">Selesai</option><option value="CANCELLED">Dibatalkan</option></Select>
       <Select defaultValue={filters.paymentStatus ?? ""} name="paymentStatus"><option value="">Semua status pembayaran</option><option value="UNPAID">Belum bayar</option><option value="DP_PAID">DP dibayar</option><option value="PAID">Lunas</option></Select>
       <div className="flex gap-2 sm:col-span-2 lg:col-span-3"><Button type="submit">Terapkan filter</Button><Link className={buttonVariants({ variant: "outline" })} href="/central">Reset</Link></div>
     </form>

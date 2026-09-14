@@ -23,7 +23,7 @@ export default async function EventDetailPage(props: PageProps<"/dashboard/event
       {created === "1" ? <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">Acara berhasil dicatat.</p> : null}
       {settled === "1" ? <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">Pelunasan berhasil diperbarui.</p> : null}
       {cancelled === "1" ? <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800" role="status">Acara berhasil dibatalkan.</p> : null}
-      {cancelled === "already" ? <p className="rounded-lg border bg-muted px-4 py-3 text-sm text-muted-foreground" role="status">Acara ini sudah dibatalkan sebelumnya.</p> : null}
+      {cancelled === "not-active" ? <p className="rounded-lg border bg-muted px-4 py-3 text-sm text-muted-foreground" role="status">Hanya acara aktif yang dapat dibatalkan.</p> : null}
       <Card>
         <CardHeader><h2 className="font-semibold">Informasi acara</h2></CardHeader>
         <CardContent className="grid gap-5 text-sm sm:grid-cols-2">
@@ -34,7 +34,7 @@ export default async function EventDetailPage(props: PageProps<"/dashboard/event
           <DetailItem label="Pelunasan" value={formatCurrency(event.finalPayment)} />
         </CardContent>
       </Card>
-      {event.eventStatus === "ACTIVE" ? <EventActions eventId={event.id} finalPayment={event.finalPayment} /> : <p className="text-sm text-muted-foreground">Acara yang dibatalkan tidak dapat menerima pelunasan baru.</p>}
+      {event.eventStatus === "ACTIVE" ? <EventActions eventId={event.id} finalPayment={event.finalPayment} /> : <p className="text-sm text-muted-foreground">Hanya acara aktif yang dapat menerima pelunasan baru atau dibatalkan.</p>}
     </div>
   );
 }

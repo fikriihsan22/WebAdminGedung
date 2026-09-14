@@ -27,8 +27,8 @@ export async function recordFinalPaymentAction(eventId: string, _: EventActionSt
       return "NOT_FOUND" as const;
     }
 
-    if (event.eventStatus === "CANCELLED") {
-      return "CANCELLED" as const;
+    if (event.eventStatus !== "ACTIVE") {
+      return "NOT_ACTIVE" as const;
     }
 
     await tx.orm.public.Event.where({ id: event.id, buildingId: user.buildingId, eventStatus: "ACTIVE" }).update({
@@ -43,8 +43,8 @@ export async function recordFinalPaymentAction(eventId: string, _: EventActionSt
     return { error: "Acara tidak ditemukan." };
   }
 
-  if (result === "CANCELLED") {
-    return { error: "Acara yang dibatalkan tidak dapat menerima pelunasan." };
+  if (result === "NOT_ACTIVE") {
+    return { error: "Hanya acara aktif yang dapat menerima pelunasan." };
   }
 
   redirect(`/dashboard/events/${eventId}?settled=1`);
@@ -65,8 +65,8 @@ export async function cancelEventAction(eventId: string) {
       return "NOT_FOUND" as const;
     }
 
-    if (event.eventStatus === "CANCELLED") {
-      return "ALREADY_CANCELLED" as const;
+    if (event.eventStatus !== "ACTIVE") {
+      return "NOT_ACTIVE" as const;
     }
 
     await tx.orm.public.Event.where({ id: event.id, buildingId: user.buildingId, eventStatus: "ACTIVE" }).update({
@@ -80,5 +80,5 @@ export async function cancelEventAction(eventId: string) {
     redirect("/dashboard");
   }
 
-  redirect(`/dashboard/events/${eventId}?cancelled=${result === "ALREADY_CANCELLED" ? "already" : "1"}`);
+  redirect(`/dashboard/events/${eventId}?cancelled=${result === "NOT_ACTIVE" ? "not-active" : "1"}`);
 }

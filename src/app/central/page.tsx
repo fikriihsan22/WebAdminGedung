@@ -8,6 +8,8 @@ import { requireCentralAdmin } from "@/lib/server/auth";
 import { getCentralDashboard } from "@/lib/server/central-dashboard";
 import { parseCentralDashboardFilters } from "@/validation/dashboard";
 
+import { SyncEventsButton } from "./sync-events-button";
+
 export default async function CentralDashboardPage(props: PageProps<"/central">) {
   const user = await requireCentralAdmin();
   const filters = parseCentralDashboardFilters(await props.searchParams);
@@ -15,11 +17,16 @@ export default async function CentralDashboardPage(props: PageProps<"/central">)
 
   return (
     <div className="space-y-6">
-      <div><p className="text-sm font-medium text-primary">Dashboard Pusat</p><h1 className="mt-1 text-2xl font-semibold">Selamat datang, {user.name}</h1><p className="mt-2 text-sm text-muted-foreground">Pantau acara seluruh gedung. Akses ini bersifat read-only.</p></div>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div><p className="text-sm font-medium text-primary">Dashboard Pusat</p><h1 className="mt-1 text-2xl font-semibold">Selamat datang, {user.name}</h1><p className="mt-2 text-sm text-muted-foreground">Pantau acara seluruh gedung dan sinkronkan status acara yang telah selesai.</p></div>
+        <SyncEventsButton />
+      </div>
+      {dashboard.defaultYear ? <p className="text-sm text-muted-foreground">Menampilkan tahun {dashboard.defaultYear}.</p> : null}
       <CentralFilters buildings={dashboard.buildings} filters={filters} />
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" aria-label="Ringkasan acara">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6" aria-label="Ringkasan acara">
         <SummaryCard label="Total acara" value={dashboard.summary.totalEvents} />
         <SummaryCard label="Acara aktif" value={dashboard.summary.activeEvents} />
+        <SummaryCard label="Acara selesai" value={dashboard.summary.completedEvents} />
         <SummaryCard label="Dibatalkan" value={dashboard.summary.cancelledEvents} />
         <SummaryCard label="Total DP" value={formatCurrency(dashboard.summary.totalDownPayment)} />
         <SummaryCard label="Total pelunasan" value={formatCurrency(dashboard.summary.totalFinalPayment)} />
@@ -31,7 +38,7 @@ export default async function CentralDashboardPage(props: PageProps<"/central">)
         </Card>
         <Card>
           <CardHeader><h2 className="font-semibold">Ringkasan per gedung</h2></CardHeader>
-          <CardContent><div className="space-y-4">{dashboard.buildingSummary.map((building) => <div key={building.id}><p className="font-medium">{building.name}</p><p className="mt-1 text-sm text-muted-foreground">{building.totalEvents} acara · {building.activeEvents} aktif · {building.cancelledEvents} dibatalkan</p></div>)}</div></CardContent>
+          <CardContent><div className="space-y-4">{dashboard.buildingSummary.map((building) => <div key={building.id}><p className="font-medium">{building.name}</p><p className="mt-1 text-sm text-muted-foreground">{building.totalEvents} acara · {building.activeEvents} aktif · {building.completedEvents} selesai · {building.cancelledEvents} dibatalkan</p></div>)}</div></CardContent>
         </Card>
       </section>
     </div>

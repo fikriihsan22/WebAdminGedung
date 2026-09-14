@@ -26,6 +26,7 @@ enum EventStatus {
   @@type("pg/text@1")
 
   ACTIVE
+  COMPLETED
   CANCELLED
 }
 
