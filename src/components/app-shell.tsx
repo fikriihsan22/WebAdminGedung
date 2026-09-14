@@ -16,9 +16,9 @@ export function AppShell({ children, user }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-muted/40 md:grid md:grid-cols-[15rem_1fr]">
-      <aside className="hidden min-h-screen md:block">
+      <aside className="hidden self-start md:sticky md:top-0 md:block md:h-screen">
         <div className="border-b bg-card px-5 py-5"><p className="text-base font-semibold">Admin Gedung</p><p className="mt-1 text-xs text-muted-foreground">Management acara</p></div>
-        <AppNavigation role={user.role} />
+        <AppNavigation role={user.role} variant="desktop" />
       </aside>
       <div className="min-w-0 pb-20 md:pb-0">
         <header className="sticky top-0 z-10 border-b bg-background/95 px-5 py-3 backdrop-blur sm:px-8">
@@ -29,7 +29,7 @@ export function AppShell({ children, user }: AppShellProps) {
         </header>
         <main className="mx-auto w-full max-w-6xl px-5 py-6 sm:px-8">{children}</main>
       </div>
-      <AppNavigation role={user.role} />
+      <AppNavigation role={user.role} variant="mobile" />
     </div>
   );
 }

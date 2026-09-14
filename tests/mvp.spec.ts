@@ -114,7 +114,25 @@ test("DP status and central dashboard filters use the same event dataset", async
   await expect(summary.getByText("Total DP").locator("..")).toContainText("Rp25.000");
   await expect(summary.getByText("Total pelunasan").locator("..")).toContainText("Rp0");
 
+  const resetLink = page.getByRole("link", { name: "Reset" });
+  await expect(resetLink).toHaveAttribute("href", "/central");
+  await resetLink.click();
+  await expect(page).toHaveURL(/\/central$/);
+
   await page.goto("/dashboard/events/new");
   await expect(page).toHaveURL(/\/central$/);
   await expect(page.getByRole("button", { name: "Simpan acara" })).not.toBeVisible();
+});
+
+test("desktop sidebar remains visible while the page scrolls", async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 600 });
+  await login(page, central);
+
+  const sidebar = page.locator("aside");
+  await expect(sidebar).toBeVisible();
+  await expect(page.getByRole("navigation", { name: "Navigasi utama" })).toHaveCount(1);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollHeight > window.innerHeight)).toBe(true);
+
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  await expect.poll(async () => (await sidebar.boundingBox())?.y).toBe(0);
 });
