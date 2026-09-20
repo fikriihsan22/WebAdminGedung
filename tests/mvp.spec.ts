@@ -110,9 +110,10 @@ test("DP status and central dashboard filters use the same event dataset", async
   const summary = page.getByLabel("Ringkasan acara");
   await expect(summary.getByText("Total acara").locator("..")).toContainText("1");
   await expect(summary.getByText("Acara aktif").locator("..")).toContainText("1");
+  await expect(summary.getByText("Acara selesai").locator("..")).toContainText("0");
   await expect(summary.getByText("Dibatalkan").locator("..")).toContainText("0");
-  await expect(summary.getByText("Total DP").locator("..")).toContainText("Rp25.000");
-  await expect(summary.getByText("Total pelunasan").locator("..")).toContainText("Rp0");
+  await expect(summary.getByText("Total DP")).not.toBeVisible();
+  await expect(summary.getByText("Total pelunasan")).not.toBeVisible();
 
   const resetLink = page.getByRole("link", { name: "Reset" });
   await expect(resetLink).toHaveAttribute("href", "/central");

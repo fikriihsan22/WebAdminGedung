@@ -4,6 +4,9 @@ import { db } from "@/../prisma/db";
 import { requireCentralAdmin } from "@/lib/server/auth";
 import type { CentralDashboardFilters } from "@/validation/dashboard";
 
+const eventsPerPage = 20;
+const buildingsPerPage = 12;
+
 function dateStart(value: string) {
   return Temporal.ZonedDateTime.from(`${value}T00:00:00[Asia/Jakarta]`).toInstant();
 }
@@ -46,10 +49,8 @@ export async function getCentralDashboard(filters: CentralDashboardFilters) {
       activeEvents: total.activeEvents + (event.eventStatus === "ACTIVE" ? 1 : 0),
       completedEvents: total.completedEvents + (event.eventStatus === "COMPLETED" ? 1 : 0),
       cancelledEvents: total.cancelledEvents + (event.eventStatus === "CANCELLED" ? 1 : 0),
-      totalDownPayment: total.totalDownPayment + event.downPayment,
-      totalFinalPayment: total.totalFinalPayment + event.finalPayment,
     }),
-    { totalEvents: 0, activeEvents: 0, completedEvents: 0, cancelledEvents: 0, totalDownPayment: 0, totalFinalPayment: 0 },
+    { totalEvents: 0, activeEvents: 0, completedEvents: 0, cancelledEvents: 0 },
   );
 
   const summaryBuildings = filters.buildingId ? buildings.filter((building) => building.id === filters.buildingId) : buildings;
@@ -65,5 +66,26 @@ export async function getCentralDashboard(filters: CentralDashboardFilters) {
     };
   });
 
-  return { events, buildings, summary, buildingSummary, defaultYear: usesDefaultYear ? defaultYear.year : null };
+  const totalPages = Math.max(1, Math.ceil(events.length / eventsPerPage));
+  const page = Math.min(filters.page, totalPages);
+  const pageStart = (page - 1) * eventsPerPage;
+  const pageEvents = events.slice(pageStart, pageStart + eventsPerPage);
+  const visibleBuildingCount = filters.buildingPage * buildingsPerPage;
+  const visibleBuildingSummary = buildingSummary.slice(0, visibleBuildingCount);
+
+  return {
+    events: pageEvents,
+    buildings,
+    summary,
+    buildingSummary: visibleBuildingSummary,
+    defaultYear: usesDefaultYear ? defaultYear.year : null,
+    pagination: {
+      page,
+      totalPages,
+      totalEvents: events.length,
+      from: events.length === 0 ? 0 : pageStart + 1,
+      to: Math.min(pageStart + eventsPerPage, events.length),
+    },
+    hasMoreBuildings: visibleBuildingCount < buildingSummary.length,
+  };
 }

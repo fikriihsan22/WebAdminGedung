@@ -12,7 +12,17 @@ export const centralDashboardFiltersSchema = z.object({
   paymentStatus: z.preprocess((value) => (value === "" ? undefined : value), z.enum(["UNPAID", "DP_PAID", "PAID"]).optional()),
 });
 
-export type CentralDashboardFilters = z.infer<typeof centralDashboardFiltersSchema>;
+export type CentralDashboardFilters = z.infer<typeof centralDashboardFiltersSchema> & {
+  page: number;
+  buildingPage: number;
+};
+
+function parsePositiveInteger(value: string | undefined, fallback: number) {
+  if (!value || !/^\d+$/.test(value)) return fallback;
+
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
 
 export function parseCentralDashboardFilters(searchParams: Record<string, string | string[] | undefined>): CentralDashboardFilters {
   const firstValue = (key: string) => {
@@ -29,5 +39,8 @@ export function parseCentralDashboardFilters(searchParams: Record<string, string
     paymentStatus: firstValue("paymentStatus"),
   });
 
-  return parsed.success ? parsed.data : {};
+  const page = parsePositiveInteger(firstValue("page"), 1);
+  const buildingPage = parsePositiveInteger(firstValue("buildingPage"), 1);
+
+  return parsed.success ? { ...parsed.data, page, buildingPage } : { page, buildingPage };
 }
