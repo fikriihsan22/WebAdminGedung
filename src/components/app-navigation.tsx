@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Building2, CalendarDays, LayoutDashboard } from "lucide-react";
+import { Building2, CalendarDays, LayoutDashboard, Settings2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
@@ -20,6 +20,7 @@ export function AppNavigation({ role, variant }: AppNavigationProps) {
   const items = [
     dashboard,
     { href: calendarHref, label: "Calendar", mobileLabel: "Calendar", Icon: CalendarDays },
+    ...(role === "CENTRAL_ADMIN" ? [{ href: "/central/buildings", label: "Kelola Gedung", mobileLabel: "Gedung", Icon: Settings2 }] : []),
   ];
 
   if (variant === "desktop") {
@@ -51,7 +52,7 @@ export function AppNavigation({ role, variant }: AppNavigationProps) {
 
   return (
     <nav aria-label="Navigasi mobile" className="fixed inset-x-0 bottom-0 z-10 border-t bg-card px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 md:hidden">
-      <div className="mx-auto grid max-w-sm grid-cols-2">
+      <div className={cn("mx-auto grid max-w-sm", role === "CENTRAL_ADMIN" ? "grid-cols-3" : "grid-cols-2")}>
         {items.map(({ href, mobileLabel, Icon }) => {
           const isActive = pathname === href;
 

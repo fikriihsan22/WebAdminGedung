@@ -28,6 +28,7 @@ export default async function EventDetailPage(props: PageProps<"/dashboard/event
         <CardHeader><h2 className="font-semibold">Informasi acara</h2></CardHeader>
         <CardContent className="grid gap-5 text-sm sm:grid-cols-2">
           <DetailItem label="Tanggal" value={formatDate(event.eventDate)} />
+          <DetailItem label="Ruang" value={event.spaceName} />
           <DetailItem label="Sesi" value={<EventSessionLabel session={event.session} />} />
           <DetailItem label="Total tagihan" value={formatCurrency(event.totalAmount)} />
           <DetailItem label="DP" value={formatCurrency(event.downPayment)} />

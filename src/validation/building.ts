@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const id = z.string().uuid();
+const id = z.string().trim().min(1).max(100);
 const name = z.string().trim().min(1, "Nama wajib diisi.").max(160);
 const spaceName = z.string().trim().min(1, "Nama ruang wajib diisi.").max(120);
 

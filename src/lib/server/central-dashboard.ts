@@ -38,9 +38,10 @@ export async function getCentralDashboard(filters: CentralDashboardFilters) {
   if (effectiveFilters.startDate) eventsQuery = eventsQuery.where((event) => event.eventDate.gte(dateStart(effectiveFilters.startDate!)));
   if (effectiveFilters.endDate) eventsQuery = eventsQuery.where((event) => event.eventDate.lte(dateEnd(effectiveFilters.endDate!)));
 
-  const [events, buildings] = await Promise.all([
+  const [events, buildings, spaces] = await Promise.all([
     eventsQuery.orderBy((event) => event.eventDate.asc()).all(),
     db.orm.public.Building.orderBy((building) => building.name.asc()).all(),
+    db.orm.public.BookingSpace.all(),
   ]);
 
   const summary = events.reduce(
@@ -69,7 +70,7 @@ export async function getCentralDashboard(filters: CentralDashboardFilters) {
   const totalPages = Math.max(1, Math.ceil(events.length / eventsPerPage));
   const page = Math.min(filters.page, totalPages);
   const pageStart = (page - 1) * eventsPerPage;
-  const pageEvents = events.slice(pageStart, pageStart + eventsPerPage);
+  const pageEvents = events.slice(pageStart, pageStart + eventsPerPage).map((event) => ({ ...event, spaceName: spaces.find((space) => space.id === event.spaceId)?.name ?? "Ruang tidak ditemukan" }));
   const visibleBuildingCount = filters.buildingPage * buildingsPerPage;
   const visibleBuildingSummary = buildingSummary.slice(0, visibleBuildingCount);
 

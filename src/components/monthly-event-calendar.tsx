@@ -16,6 +16,7 @@ type CalendarEvent = {
   eventDate: Temporal.Instant;
   paymentStatus: "UNPAID" | "DP_PAID" | "PAID";
   session: "DAY" | "NIGHT";
+  spaceName: string;
 };
 
 type MonthlyEventCalendarProps = {
@@ -115,7 +116,7 @@ export function MonthlyEventCalendar({ basePath, buildingId, eventDetailPath, ev
                     <p className={cn("flex size-6 items-center justify-center rounded-full text-xs font-semibold", date.key === todayKey && "bg-primary text-primary-foreground")}>{date.day}</p>
                     <div className="mt-2 space-y-2">
                       {dateEvents.map((event) => {
-                        const content = <><p className="truncate font-medium">{event.clientName}</p><p className="mt-1 text-muted-foreground"><EventSessionLabel session={event.session} /></p><div className="mt-2"><PaymentStatusBadge status={event.paymentStatus} /></div></>;
+                        const content = <><p className="truncate font-medium">{event.clientName}</p><p className="mt-1 text-muted-foreground">{event.spaceName} · <EventSessionLabel session={event.session} /></p><div className="mt-2"><PaymentStatusBadge status={event.paymentStatus} /></div></>;
 
                         return eventDetailPath ? (
                           <Link aria-label={`Lihat detail ${event.clientName}, sesi ${event.session === "DAY" ? "siang" : "malam"}`} className="block rounded-md border bg-background p-2 text-xs outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring" href={`${eventDetailPath}/${event.id}`} key={event.id}>

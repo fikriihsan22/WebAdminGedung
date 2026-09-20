@@ -25,6 +25,7 @@ function isCalendarDate(value: string) {
 }
 
 export const eventFormSchema = z.object({
+  spaceId: z.string().min(1).optional(),
   clientName: z.string().trim().min(1, "Nama client wajib diisi.").max(160),
   eventDate: z.string().refine(isCalendarDate, "Tanggal acara tidak valid."),
   session: z.enum(["DAY", "NIGHT"], "Sesi acara wajib dipilih."),
@@ -38,6 +39,7 @@ export type EventFormInput = z.infer<typeof eventFormSchema>;
 export function eventFormData(formData: FormData) {
   return {
     clientName: formData.get("clientName"),
+    spaceId: formData.get("spaceId") || undefined,
     eventDate: formData.get("eventDate"),
     session: formData.get("session"),
     totalAmount: formData.get("totalAmount"),

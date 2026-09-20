@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { cleanupTestEvents, closeTestDatabase, createTestCalendarEvent } from "./database";
+import { cleanupTestBallrooms, cleanupTestEvents, closeTestDatabase, createTestBallrooms, createTestCalendarEvent } from "./database";
 
 const alpha = { username: "admin.alpha", pin: "123456" };
 const central = { username: "admin.pusat", pin: "123456" };
@@ -9,10 +9,12 @@ test.describe.configure({ mode: "serial" });
 
 test.beforeEach(async () => {
   await cleanupTestEvents();
+  await cleanupTestBallrooms();
 });
 
 test.afterEach(async () => {
   await cleanupTestEvents();
+  await cleanupTestBallrooms();
 });
 
 test.afterAll(async () => {
@@ -24,17 +26,20 @@ async function login(page: Page, credentials: { username: string; pin: string })
   await page.getByLabel("Username").fill(credentials.username);
   await page.getByLabel("PIN").fill(credentials.pin);
   await page.getByRole("button", { name: "Masuk" }).click();
+  await expect(page).toHaveURL(/\/(dashboard|central)$/);
 }
 
-async function createEvent(page: Page, values: { clientName: string; eventDate: string; downPayment: string }) {
+async function createEvent(page: Page, values: { clientName: string; eventDate: string; downPayment: string; spaceId?: string }) {
   await page.goto("/dashboard/events/new");
   await page.getByLabel("Nama client").fill(values.clientName);
   await page.getByLabel("Tanggal acara").fill(values.eventDate);
+  if (values.spaceId) await page.locator('select[name="spaceId"]').selectOption(values.spaceId);
   await page.locator('select[name="session"]').selectOption("DAY");
   await page.getByLabel("Total tagihan").fill("100000");
   await page.getByLabel("Jumlah DP").fill(values.downPayment);
   await page.getByRole("button", { name: "Simpan acara" }).click();
   await expect(page).toHaveURL(/\/dashboard\/events\/.+\?created=1$/);
+  return page.url();
 }
 
 function currentCalendarMonth() {
@@ -74,7 +79,7 @@ test("creating an event requires a positive down payment", async ({ page }) => {
   await page.getByRole("button", { name: "Simpan acara" }).click();
 
   await expect(page).toHaveURL(/\/dashboard\/events\/new$/);
-  await expect(page.getByRole("alert")).toHaveText("Periksa kembali data acara yang diisi.");
+  await expect(page.getByText("Periksa kembali data acara yang diisi.", { exact: true })).toBeVisible();
 });
 
 test("authentication redirects unauthenticated users, persists a session, and logs out", async ({ page }) => {
@@ -108,12 +113,12 @@ test("building admin is isolated to their building and cannot read another build
 test("event lifecycle calculates payment status, rejects a duplicate active slot, and retains cancelled history", async ({ page }) => {
   await login(page, alpha);
   await createEvent(page, { clientName: "E2E Test Lifecycle", eventDate: "2098-01-10", downPayment: "25000" });
-  await expect(page.getByText("DP dibayar")).toBeVisible();
+  await expect(page.getByText("DP dibayar", { exact: true })).toBeVisible();
 
   await page.getByLabel("Nilai pelunasan").fill("100000");
   await page.getByRole("button", { name: "Simpan", exact: true }).click();
   await expect(page.getByText("Pelunasan berhasil diperbarui.")).toBeVisible();
-  await expect(page.getByText("Lunas")).toBeVisible();
+  await expect(page.getByText("Lunas", { exact: true })).toBeVisible();
 
   await page.goto("/dashboard/events/new");
   await page.getByLabel("Nama client").fill("E2E Test Conflict");
@@ -122,20 +127,43 @@ test("event lifecycle calculates payment status, rejects a duplicate active slot
   await page.getByLabel("Total tagihan").fill("100000");
   await page.getByLabel("Jumlah DP").fill("25000");
   await page.getByRole("button", { name: "Simpan acara" }).click();
-  await expect(page.getByText("Sesi pada tanggal tersebut sudah digunakan. Pilih sesi atau tanggal lain.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Gedung Utama sudah digunakan pada tanggal dan sesi yang dipilih.", { exact: true })).toBeVisible();
 
   await page.goBack();
   await page.getByRole("button", { name: "Batalkan acara" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "Ya, batalkan" }).click();
-  await expect(page.getByText("Acara berhasil dibatalkan.")).toBeVisible();
-  await expect(page.getByText("Dibatalkan")).toBeVisible();
-  await expect(page.getByText("Acara yang dibatalkan tidak dapat menerima pelunasan baru.")).toBeVisible();
+  await expect(page.getByText("Acara berhasil dibatalkan.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Dibatalkan", { exact: true })).toBeVisible();
+  await expect(page.getByText("Hanya acara aktif yang dapat menerima pelunasan baru atau dibatalkan.", { exact: true })).toBeVisible();
+});
+
+test("ballrooms allow parallel bookings but reject the same active slot", async ({ page }) => {
+  await createTestBallrooms();
+  await login(page, alpha);
+  const ballroomADetailUrl = await createEvent(page, { clientName: "E2E Test Ballroom A", eventDate: "2098-02-10", downPayment: "25000", spaceId: "e2e-ballroom-a" });
+  await createEvent(page, { clientName: "E2E Test Ballroom B", eventDate: "2098-02-10", downPayment: "25000", spaceId: "e2e-ballroom-b" });
+
+  await page.goto("/dashboard/events/new");
+  await page.getByLabel("Nama client").fill("E2E Test Ballroom Conflict");
+  await page.getByLabel("Tanggal acara").fill("2098-02-10");
+  await page.locator('select[name="spaceId"]').selectOption("e2e-ballroom-a");
+  await page.locator('select[name="session"]').selectOption("DAY");
+  await page.getByLabel("Total tagihan").fill("100000");
+  await page.getByLabel("Jumlah DP").fill("25000");
+  await page.getByRole("button", { name: "Simpan acara" }).click();
+  await expect(page.getByText("E2E Ballroom A sudah digunakan pada tanggal dan sesi yang dipilih.", { exact: true })).toBeVisible();
+
+  await page.goto(ballroomADetailUrl);
+  await page.getByRole("button", { name: "Batalkan acara" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Ya, batalkan" }).click();
+
+  await createEvent(page, { clientName: "E2E Test Ballroom Reuse", eventDate: "2098-02-10", downPayment: "25000", spaceId: "e2e-ballroom-a" });
 });
 
 test("DP status and central dashboard filters use the same event dataset", async ({ page }) => {
   await login(page, alpha);
   await createEvent(page, { clientName: "E2E Test Dashboard", eventDate: "2098-01-11", downPayment: "25000" });
-  await expect(page.getByText("DP dibayar")).toBeVisible();
+  await expect(page.getByText("DP dibayar", { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Keluar" }).click();
   await login(page, central);
@@ -151,7 +179,7 @@ test("DP status and central dashboard filters use the same event dataset", async
   await expect(summary.getByText("Total acara").locator("..")).toContainText("1");
   await expect(summary.getByText("Acara aktif").locator("..")).toContainText("1");
   await expect(summary.getByText("Acara selesai").locator("..")).toContainText("0");
-  await expect(summary.getByText("Dibatalkan").locator("..")).toContainText("0");
+  await expect(summary.getByText("Dibatalkan", { exact: true }).locator("..")).toContainText("0");
   await expect(summary.getByText("Total DP")).not.toBeVisible();
   await expect(summary.getByText("Total pelunasan")).not.toBeVisible();
 
@@ -159,6 +187,11 @@ test("DP status and central dashboard filters use the same event dataset", async
   await expect(resetLink).toHaveAttribute("href", "/central");
   await resetLink.click();
   await expect(page).toHaveURL(/\/central$/);
+
+  await page.goto("/central/buildings");
+  await expect(page).toHaveURL(/\/central\/buildings$/);
+  await expect(page.getByRole("heading", { name: "Kelola Gedung" })).toBeVisible();
+  await expect(page.locator("article")).toHaveCount(2);
 
   await page.goto("/dashboard/events/new");
   await expect(page).toHaveURL(/\/central$/);

@@ -7,9 +7,9 @@ import { requireBuildingAdmin } from "@/lib/server/auth";
 
 export async function listBuildingEvents() {
   const { buildingId } = await requireBuildingAdmin();
-  const events = await db.orm.public.Event.where({ buildingId }).all();
+  const [events, spaces] = await Promise.all([db.orm.public.Event.where({ buildingId }).all(), db.orm.public.BookingSpace.where({ buildingId }).all()]);
 
-  return events.sort((first, second) => first.eventDate.epochMilliseconds - second.eventDate.epochMilliseconds);
+  return events.map((event) => ({ ...event, spaceName: spaces.find((space) => space.id === event.spaceId)?.name ?? "Ruang tidak ditemukan" })).sort((first, second) => first.eventDate.epochMilliseconds - second.eventDate.epochMilliseconds);
 }
 
 export async function getBuildingEvent(eventId: string) {
@@ -20,5 +20,6 @@ export async function getBuildingEvent(eventId: string) {
     notFound();
   }
 
-  return event;
+  const space = await db.orm.public.BookingSpace.where({ id: event.spaceId, buildingId }).first();
+  return { ...event, spaceName: space?.name ?? "Ruang tidak ditemukan" };
 }

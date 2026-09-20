@@ -39,11 +39,10 @@ export async function createEventAction(_: CreateEventActionState, formData: For
 
       const bookingSpaces = await tx.orm.public.BookingSpace.where({ buildingId: user.buildingId, isActive: true }).all();
 
-      if (bookingSpaces.length !== 1) {
+      const bookingSpace = input.spaceId ? bookingSpaces.find((space) => space.id === input.spaceId) : bookingSpaces.length === 1 ? bookingSpaces[0] : undefined;
+      if (!bookingSpace) {
         return "SPACE_SELECTION_REQUIRED" as const;
       }
-
-      const bookingSpace = bookingSpaces[0];
       const conflictingEvent = await tx.orm.public.Event.where({
         buildingId: user.buildingId,
         spaceId: bookingSpace.id,
@@ -53,7 +52,7 @@ export async function createEventAction(_: CreateEventActionState, formData: For
       }).first();
 
       if (conflictingEvent) {
-        return null;
+        return { kind: "CONFLICT" as const, spaceName: bookingSpace.name };
       }
 
       return tx.orm.public.Event.create({
@@ -77,17 +76,17 @@ export async function createEventAction(_: CreateEventActionState, formData: For
     }
 
     if (event === "SPACE_SELECTION_REQUIRED") {
-      return { error: "Gedung memiliki beberapa ruang booking. Pilih ruang setelah fitur pemilihan ruang tersedia." };
+      return { error: "Pilih ruang atau ballroom yang aktif terlebih dahulu." };
     }
 
-    if (!event) {
-      return { error: "Sesi pada tanggal tersebut sudah digunakan. Pilih sesi atau tanggal lain." };
+    if (event && "kind" in event) {
+      return { error: `${event.spaceName} sudah digunakan pada tanggal dan sesi yang dipilih.` };
     }
 
     redirect(`/dashboard/events/${event.id}?created=1`);
   } catch (error) {
     if (isUniqueViolation(error)) {
-      return { error: "Sesi pada tanggal tersebut sudah digunakan. Pilih sesi atau tanggal lain." };
+      return { error: "Ruang atau ballroom tersebut baru saja digunakan pada tanggal dan sesi yang dipilih." };
     }
 
     throw error;

@@ -22,9 +22,8 @@ async function listCalendarEvents(buildingId: string, month: string) {
   eventsQuery = eventsQuery.where((event) => event.eventDate.gte(start));
   eventsQuery = eventsQuery.where((event) => event.eventDate.lt(end));
 
-  const events = await eventsQuery.orderBy((event) => event.eventDate.asc()).all();
-
-  return events.filter((event) => event.eventStatus !== "CANCELLED" && event.paymentStatus !== "UNPAID");
+  const [events, spaces] = await Promise.all([eventsQuery.orderBy((event) => event.eventDate.asc()).all(), db.orm.public.BookingSpace.where({ buildingId }).all()]);
+  return events.filter((event) => event.eventStatus !== "CANCELLED" && event.paymentStatus !== "UNPAID").map((event) => ({ ...event, spaceName: spaces.find((space) => space.id === event.spaceId)?.name ?? "Ruang tidak ditemukan" }));
 }
 
 export async function getBuildingCalendar(filters: CalendarFilters) {

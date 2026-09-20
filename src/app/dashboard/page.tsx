@@ -30,7 +30,7 @@ export default async function BuildingDashboardPage() {
               <Card className="transition-colors hover:bg-muted/50">
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0"><h2 className="truncate font-semibold">{event.clientName}</h2><p className="mt-1 text-sm text-muted-foreground">{formatDate(event.eventDate)} · <EventSessionLabel session={event.session} /></p></div>
+                    <div className="min-w-0"><h2 className="truncate font-semibold">{event.clientName}</h2><p className="mt-1 text-sm text-muted-foreground">{event.spaceName} · {formatDate(event.eventDate)} · <EventSessionLabel session={event.session} /></p></div>
                     <span className="shrink-0 text-sm text-muted-foreground">Detail</span>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2"><EventStatusBadge status={event.eventStatus} /><PaymentStatusBadge status={event.paymentStatus} /></div>

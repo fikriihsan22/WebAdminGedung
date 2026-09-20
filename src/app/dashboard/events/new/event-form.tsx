@@ -11,7 +11,7 @@ import { eventFormData, eventFormSchema } from "@/validation/event";
 
 const initialState: CreateEventActionState = {};
 
-export function EventForm() {
+export function EventForm({ spaces }: { spaces: Array<{ id: string; name: string }> }) {
   const [state, formAction, isPending] = useActionState(createEventAction, initialState);
   const [clientError, setClientError] = useState<string>();
 
@@ -32,6 +32,7 @@ export function EventForm() {
       }}
     >
       <Field label="Nama client"><Input autoComplete="organization" maxLength={160} name="clientName" required /></Field>
+      {spaces.length > 1 ? <Field label="Ruang / Ballroom"><Select defaultValue="" name="spaceId" required><option disabled value="">Pilih ruang</option>{spaces.map((space) => <option key={space.id} value={space.id}>{space.name}</option>)}</Select></Field> : null}
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Tanggal acara"><Input name="eventDate" required type="date" /></Field>
         <Field label="Sesi"><Select defaultValue="" name="session" required><option disabled value="">Pilih sesi</option><option value="DAY">Siang</option><option value="NIGHT">Malam</option></Select></Field>
