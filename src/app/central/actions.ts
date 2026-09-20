@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/../prisma/db";
-import { requireCentralAdmin } from "@/lib/server/auth";
+import { requireCentralAdminCapability } from "@/lib/server/auth";
 
 const businessTimeZone = "Asia/Jakarta";
 
@@ -13,7 +13,7 @@ function startOfTodayInBusinessTime() {
 }
 
 export async function syncCompletedEventsAction() {
-  await requireCentralAdmin();
+  await requireCentralAdminCapability("SYNC_PAST_EVENTS");
 
   const cutoff = startOfTodayInBusinessTime();
   const updatedCount = await db.transaction(async (tx) => {

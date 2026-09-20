@@ -8,6 +8,11 @@ const buildings = [
   { id: "building-beta", name: "Gedung Beta" },
 ];
 
+const bookingSpaces = [
+  { id: "building-alpha", buildingId: "building-alpha", name: "Gedung Utama", sortOrder: 0 },
+  { id: "building-beta", buildingId: "building-beta", name: "Gedung Utama", sortOrder: 0 },
+];
+
 const users = [
   {
     id: "user-central-admin",
@@ -49,6 +54,15 @@ async function main() {
       }
     }
 
+    for (const space of bookingSpaces) {
+      const existing = await tx.orm.public.BookingSpace.where({ id: space.id }).first();
+      if (existing) {
+        await tx.orm.public.BookingSpace.where({ id: space.id }).update({ name: space.name, sortOrder: space.sortOrder, isActive: true });
+      } else {
+        await tx.orm.public.BookingSpace.create({ ...space, isActive: true });
+      }
+    }
+
     for (const user of users) {
       const existing = await tx.orm.public.User.where({ id: user.id }).first();
       const values = {
@@ -71,6 +85,7 @@ async function main() {
       {
         id: "event-alpha-day",
         buildingId: "building-alpha",
+        spaceId: "building-alpha",
         clientName: "PT Nusantara",
         eventDate: Temporal.Instant.from("2026-09-20T00:00:00.000Z"),
         session: "DAY" as const,
@@ -85,6 +100,7 @@ async function main() {
       {
         id: "event-beta-night",
         buildingId: "building-beta",
+        spaceId: "building-beta",
         clientName: "Komunitas Harmoni",
         eventDate: Temporal.Instant.from("2026-09-27T00:00:00.000Z"),
         session: "NIGHT" as const,

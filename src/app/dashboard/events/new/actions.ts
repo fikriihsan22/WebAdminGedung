@@ -31,8 +31,22 @@ export async function createEventAction(_: CreateEventActionState, formData: For
 
   try {
     const event = await db.transaction(async (tx) => {
+      const building = await tx.orm.public.Building.where({ id: user.buildingId, isActive: true }).first();
+
+      if (!building) {
+        return "BUILDING_INACTIVE" as const;
+      }
+
+      const bookingSpaces = await tx.orm.public.BookingSpace.where({ buildingId: user.buildingId, isActive: true }).all();
+
+      if (bookingSpaces.length !== 1) {
+        return "SPACE_SELECTION_REQUIRED" as const;
+      }
+
+      const bookingSpace = bookingSpaces[0];
       const conflictingEvent = await tx.orm.public.Event.where({
         buildingId: user.buildingId,
+        spaceId: bookingSpace.id,
         eventDate,
         session: input.session,
         eventStatus: "ACTIVE",
@@ -44,6 +58,7 @@ export async function createEventAction(_: CreateEventActionState, formData: For
 
       return tx.orm.public.Event.create({
         buildingId: user.buildingId,
+        spaceId: bookingSpace.id,
         clientName: input.clientName,
         eventDate,
         session: input.session,
@@ -56,6 +71,14 @@ export async function createEventAction(_: CreateEventActionState, formData: For
         cancelReason: null,
       });
     });
+
+    if (event === "BUILDING_INACTIVE") {
+      return { error: "Gedung tidak aktif dan tidak dapat menerima acara baru." };
+    }
+
+    if (event === "SPACE_SELECTION_REQUIRED") {
+      return { error: "Gedung memiliki beberapa ruang booking. Pilih ruang setelah fitur pemilihan ruang tersedia." };
+    }
 
     if (!event) {
       return { error: "Sesi pada tanggal tersebut sudah digunakan. Pilih sesi atau tanggal lain." };

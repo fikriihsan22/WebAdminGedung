@@ -1,7 +1,7 @@
 import "server-only";
 
 import { db } from "@/../prisma/db";
-import { requireBuildingAdmin, requireCentralAdmin } from "@/lib/server/auth";
+import { requireBuildingAdmin, requireCentralAdminCapability } from "@/lib/server/auth";
 import type { CalendarFilters } from "@/validation/calendar";
 
 const businessTimeZone = "Asia/Jakarta";
@@ -37,7 +37,7 @@ export async function getBuildingCalendar(filters: CalendarFilters) {
 }
 
 export async function getCentralCalendar(filters: CalendarFilters) {
-  await requireCentralAdmin();
+  await requireCentralAdminCapability("VIEW_CROSS_BUILDING_EVENTS");
 
   const buildings = await db.orm.public.Building.orderBy((building) => building.name.asc()).all();
   const selectedBuilding = buildings.find((building) => building.id === filters.buildingId) ?? buildings[0] ?? null;

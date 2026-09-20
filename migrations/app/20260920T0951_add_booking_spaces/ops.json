@@ -1,0 +1,651 @@
+[
+  {
+    "id": "dropCheckConstraint.event.event_eventStatus_check_3f65f91a",
+    "label": "Drop check constraint \"event_eventStatus_check_3f65f91a\" on \"event\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "event_eventStatus_check_3f65f91a",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"event_eventStatus_check_3f65f91a\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_eventStatus_check_3f65f91a",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop check constraint \"event_eventStatus_check_3f65f91a\"",
+        "sql": "ALTER TABLE \"public\".\"event\" DROP CONSTRAINT \"event_eventStatus_check_3f65f91a\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"event_eventStatus_check_3f65f91a\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_eventStatus_check_3f65f91a",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dropIndex.event.event_active_slot_d8db796a",
+    "label": "Drop index \"event_active_slot_d8db796a\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "event_active_slot_d8db796a",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"event_active_slot_d8db796a\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_active_slot_d8db796a\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "drop index \"event_active_slot_d8db796a\"",
+        "sql": "DROP INDEX \"public\".\"event_active_slot_d8db796a\"",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"event_active_slot_d8db796a\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_active_slot_d8db796a\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "table.bookingSpace",
+    "label": "Create table \"bookingSpace\"",
+    "summary": "Creates table \"bookingSpace\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "table",
+        "name": "bookingSpace"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure table \"bookingSpace\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"bookingSpace\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create table \"bookingSpace\"",
+        "sql": "CREATE TABLE \"public\".\"bookingSpace\" (\n  \"buildingId\" text NOT NULL,\n  \"createdAt\" timestamptz DEFAULT (now()) NOT NULL,\n  \"id\" text NOT NULL,\n  \"isActive\" bool DEFAULT true NOT NULL,\n  \"name\" text NOT NULL,\n  \"sortOrder\" int4 DEFAULT 0 NOT NULL,\n  \"updatedAt\" timestamptz NOT NULL,\n  PRIMARY KEY (\"id\")\n)",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify table \"bookingSpace\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"bookingSpace\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "column.public.event.spaceId",
+    "label": "Add column \"spaceId\" to \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "spaceId",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"spaceId\" is missing",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "event",
+          "spaceId"
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add column \"spaceId\"",
+        "sql": "ALTER TABLE \"public\".\"event\" ADD COLUMN \"spaceId\" text"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"spaceId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "event",
+          "spaceId"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "data_migration.backfill-event-spaceId",
+    "label": "Data transform: create default booking spaces and backfill event spaceId",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres"
+    },
+    "precheck": [
+      {
+        "description": "Check events or buildings need default booking spaces",
+        "sql": "SELECT EXISTS (SELECT 1 FROM \"public\".\"event\" WHERE \"spaceId\" IS NULL) OR EXISTS (SELECT 1 FROM \"public\".\"building\" b WHERE NOT EXISTS (SELECT 1 FROM \"public\".\"bookingSpace\" s WHERE s.\"buildingId\" = b.\"id\")) AS ok",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "Create one Gedung Utama booking space per existing building",
+        "sql": "INSERT INTO \"public\".\"bookingSpace\" (\"id\", \"buildingId\", \"name\", \"isActive\", \"sortOrder\", \"createdAt\", \"updatedAt\") SELECT b.\"id\", b.\"id\", 'Gedung Utama', TRUE, 0, NOW(), NOW() FROM \"public\".\"building\" b ON CONFLICT (\"id\") DO NOTHING",
+        "params": []
+      },
+      {
+        "description": "Assign each historic event to its building default space",
+        "sql": "UPDATE \"public\".\"event\" SET \"spaceId\" = \"buildingId\" WHERE \"spaceId\" IS NULL",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "Verify every building has a booking space and every event has one",
+        "sql": "SELECT NOT EXISTS (SELECT 1 FROM \"public\".\"event\" WHERE \"spaceId\" IS NULL) AND NOT EXISTS (SELECT 1 FROM \"public\".\"building\" b WHERE NOT EXISTS (SELECT 1 FROM \"public\".\"bookingSpace\" s WHERE s.\"buildingId\" = b.\"id\")) AS ok",
+        "params": []
+      }
+    ]
+  },
+  {
+    "id": "alterNullability.setNotNull.event.spaceId",
+    "label": "Set NOT NULL on \"event\".\"spaceId\"",
+    "operationClass": "destructive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "spaceId",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"spaceId\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "event",
+          "spaceId"
+        ]
+      },
+      {
+        "description": "ensure no NULL values in \"spaceId\"",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"public\".\"event\" WHERE \"spaceId\" IS NULL) AS \"result\"",
+        "params": []
+      }
+    ],
+    "execute": [
+      {
+        "description": "set NOT NULL on \"spaceId\"",
+        "sql": "ALTER TABLE \"public\".\"event\" ALTER COLUMN \"spaceId\" SET NOT NULL"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"spaceId\" is NOT NULL",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3 AND \"is_nullable\" = $4)) AS \"result\"",
+        "params": [
+          "public",
+          "event",
+          "spaceId",
+          "NO"
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.bookingSpace.bookingSpace_id_buildingId_key",
+    "label": "Add unique constraint on \"bookingSpace\" (id, buildingId)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "bookingSpace_id_buildingId_key",
+        "table": "bookingSpace"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"bookingSpace_id_buildingId_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "bookingSpace_id_buildingId_key",
+          "public",
+          "\"public\".\"bookingSpace\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"bookingSpace_id_buildingId_key\"",
+        "sql": "ALTER TABLE \"public\".\"bookingSpace\" ADD CONSTRAINT \"bookingSpace_id_buildingId_key\" UNIQUE (\"id\", \"buildingId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"bookingSpace_id_buildingId_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "bookingSpace_id_buildingId_key",
+          "public",
+          "\"public\".\"bookingSpace\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "unique.bookingSpace.bookingSpace_buildingId_name_key",
+    "label": "Add unique constraint on \"bookingSpace\" (buildingId, name)",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "unique",
+        "name": "bookingSpace_buildingId_name_key",
+        "table": "bookingSpace"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"bookingSpace_buildingId_name_key\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "bookingSpace_buildingId_name_key",
+          "public",
+          "\"public\".\"bookingSpace\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add unique constraint \"bookingSpace_buildingId_name_key\"",
+        "sql": "ALTER TABLE \"public\".\"bookingSpace\" ADD CONSTRAINT \"bookingSpace_buildingId_name_key\" UNIQUE (\"buildingId\", \"name\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"bookingSpace_buildingId_name_key\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "bookingSpace_buildingId_name_key",
+          "public",
+          "\"public\".\"bookingSpace\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "checkConstraint.event.event_eventStatus_check_026b7fc1",
+    "label": "Add check constraint \"event_eventStatus_check_026b7fc1\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "checkConstraint",
+        "name": "event_eventStatus_check_026b7fc1",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure constraint \"event_eventStatus_check_026b7fc1\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_eventStatus_check_026b7fc1",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add check constraint \"event_eventStatus_check_026b7fc1\"",
+        "sql": "ALTER TABLE \"public\".\"event\" ADD CONSTRAINT \"event_eventStatus_check_026b7fc1\" CHECK (\"eventStatus\" IN ('ACTIVE', 'COMPLETED', 'CANCELLED'))"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify constraint \"event_eventStatus_check_026b7fc1\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_eventStatus_check_026b7fc1",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.bookingSpace.bookingSpace_buildingId_idx_c40fd7b4",
+    "label": "Create index \"bookingSpace_buildingId_idx_c40fd7b4\" on \"bookingSpace\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "bookingSpace_buildingId_idx_c40fd7b4",
+        "table": "bookingSpace"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"bookingSpace_buildingId_idx_c40fd7b4\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"bookingSpace_buildingId_idx_c40fd7b4\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"bookingSpace_buildingId_idx_c40fd7b4\"",
+        "sql": "CREATE INDEX \"bookingSpace_buildingId_idx_c40fd7b4\" ON \"public\".\"bookingSpace\" (\"buildingId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"bookingSpace_buildingId_idx_c40fd7b4\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"bookingSpace_buildingId_idx_c40fd7b4\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.bookingSpace.bookingSpace_buildingId_isActive_sortOrder_idx_e75a5aee",
+    "label": "Create index \"bookingSpace_buildingId_isActive_sortOrder_idx_e75a5aee\" on \"bookingSpace\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "bookingSpace_buildingId_isActive_sortOrder_idx_e75a5aee",
+        "table": "bookingSpace"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"bookingSpace_buildingId_isActive_sortOrder_idx_e75a5aee\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"bookingSpace_buildingId_isActive_sortOrder_idx_e75a5aee\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"bookingSpace_buildingId_isActive_sortOrder_idx_e75a5aee\"",
+        "sql": "CREATE INDEX \"bookingSpace_buildingId_isActive_sortOrder_idx_e75a5aee\" ON \"public\".\"bookingSpace\" (\"buildingId\", \"isActive\", \"sortOrder\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"bookingSpace_buildingId_isActive_sortOrder_idx_e75a5aee\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"bookingSpace_buildingId_isActive_sortOrder_idx_e75a5aee\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.event.event_active_space_slot_9709ae04",
+    "label": "Create index \"event_active_space_slot_9709ae04\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "event_active_space_slot_9709ae04",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"event_active_space_slot_9709ae04\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_active_space_slot_9709ae04\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"event_active_space_slot_9709ae04\"",
+        "sql": "CREATE UNIQUE INDEX \"event_active_space_slot_9709ae04\" ON \"public\".\"event\" (\"spaceId\", \"eventDate\", \"session\") WHERE ((\"eventStatus\" = 'ACTIVE'))",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"event_active_space_slot_9709ae04\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_active_space_slot_9709ae04\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.event.event_spaceId_buildingId_idx_47ed4392",
+    "label": "Create index \"event_spaceId_buildingId_idx_47ed4392\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "event_spaceId_buildingId_idx_47ed4392",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"event_spaceId_buildingId_idx_47ed4392\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_spaceId_buildingId_idx_47ed4392\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"event_spaceId_buildingId_idx_47ed4392\"",
+        "sql": "CREATE INDEX \"event_spaceId_buildingId_idx_47ed4392\" ON \"public\".\"event\" (\"spaceId\", \"buildingId\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"event_spaceId_buildingId_idx_47ed4392\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_spaceId_buildingId_idx_47ed4392\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "index.event.event_spaceId_eventDate_idx_aeffb60b",
+    "label": "Create index \"event_spaceId_eventDate_idx_aeffb60b\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "index",
+        "name": "event_spaceId_eventDate_idx_aeffb60b",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure index \"event_spaceId_eventDate_idx_aeffb60b\" does not exist",
+        "sql": "SELECT (to_regclass($1)) IS NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_spaceId_eventDate_idx_aeffb60b\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "create index \"event_spaceId_eventDate_idx_aeffb60b\"",
+        "sql": "CREATE INDEX \"event_spaceId_eventDate_idx_aeffb60b\" ON \"public\".\"event\" (\"spaceId\", \"eventDate\")",
+        "params": []
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify index \"event_spaceId_eventDate_idx_aeffb60b\" exists",
+        "sql": "SELECT (to_regclass($1)) IS NOT NULL AS \"result\"",
+        "params": [
+          "\"public\".\"event_spaceId_eventDate_idx_aeffb60b\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.bookingSpace.bookingSpace_buildingId_fkey",
+    "label": "Add foreign key \"bookingSpace_buildingId_fkey\" on \"bookingSpace\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "bookingSpace_buildingId_fkey",
+        "table": "bookingSpace"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"bookingSpace_buildingId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "bookingSpace_buildingId_fkey",
+          "public",
+          "\"public\".\"bookingSpace\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"bookingSpace_buildingId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"bookingSpace\"\nADD CONSTRAINT \"bookingSpace_buildingId_fkey\"\nFOREIGN KEY (\"buildingId\")\nREFERENCES \"public\".\"building\" (\"id\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"bookingSpace_buildingId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "bookingSpace_buildingId_fkey",
+          "public",
+          "\"public\".\"bookingSpace\""
+        ]
+      }
+    ]
+  },
+  {
+    "id": "foreignKey.event.event_spaceId_buildingId_fkey",
+    "label": "Add foreign key \"event_spaceId_buildingId_fkey\" on \"event\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "foreignKey",
+        "name": "event_spaceId_buildingId_fkey",
+        "table": "event"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure FK \"event_spaceId_buildingId_fkey\" does not exist",
+        "sql": "SELECT NOT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_spaceId_buildingId_fkey",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ],
+    "execute": [
+      {
+        "description": "add FK \"event_spaceId_buildingId_fkey\"",
+        "sql": "ALTER TABLE \"public\".\"event\"\nADD CONSTRAINT \"event_spaceId_buildingId_fkey\"\nFOREIGN KEY (\"spaceId\", \"buildingId\")\nREFERENCES \"public\".\"bookingSpace\" (\"id\", \"buildingId\")"
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify FK \"event_spaceId_buildingId_fkey\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_constraint\" AS \"c\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"connamespace\" WHERE (\"c\".\"conname\" = $1 AND \"n\".\"nspname\" = $2 AND \"c\".\"conrelid\" = to_regclass($3))) AS \"result\"",
+        "params": [
+          "event_spaceId_buildingId_fkey",
+          "public",
+          "\"public\".\"event\""
+        ]
+      }
+    ]
+  }
+]

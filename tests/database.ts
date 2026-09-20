@@ -39,6 +39,7 @@ export async function createTestCalendarEvent({
   await db.orm.public.Event.create({
     id: crypto.randomUUID(),
     buildingId: "building-alpha",
+    spaceId: "building-alpha",
     clientName: `${testClientPrefix}${clientName}`,
     eventDate,
     session: "DAY",

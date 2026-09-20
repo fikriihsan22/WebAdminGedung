@@ -1,7 +1,7 @@
 import "server-only";
 
 import { db } from "@/../prisma/db";
-import { requireCentralAdmin } from "@/lib/server/auth";
+import { requireCentralAdminCapability } from "@/lib/server/auth";
 import type { CentralDashboardFilters } from "@/validation/dashboard";
 
 const eventsPerPage = 20;
@@ -21,7 +21,7 @@ function currentYearRange() {
 }
 
 export async function getCentralDashboard(filters: CentralDashboardFilters) {
-  await requireCentralAdmin();
+  await requireCentralAdminCapability("VIEW_CROSS_BUILDING_EVENTS");
 
   const usesDefaultYear = !filters.startDate && !filters.endDate;
   const defaultYear = currentYearRange();

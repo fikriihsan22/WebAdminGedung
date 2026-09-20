@@ -62,12 +62,31 @@ model Building {
   updatedAt temporal.updatedAt()
   users     User[]
   events    Event[]
+  bookingSpaces BookingSpace[]
+}
+
+model BookingSpace {
+  id        String   @id @default(uuid())
+  buildingId String
+  building  Building @relation(fields: [buildingId], references: [id])
+  name      String
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  events    Event[]  @relation("BookingSpaceEvents")
+  createdAt DateTime @default(now())
+  updatedAt temporal.updatedAt()
+
+  @@unique([id, buildingId])
+  @@unique([buildingId, name])
+  @@index([buildingId, isActive, sortOrder])
 }
 
 model Event {
   id            String        @id @default(uuid())
   buildingId    String
   building      Building      @relation(fields: [buildingId], references: [id])
+  spaceId       String
+  bookingSpace  BookingSpace  @relation("BookingSpaceEvents", fields: [spaceId, buildingId], references: [id, buildingId])
   clientName    String
   eventDate     DateTime
   session       EventSession
@@ -83,6 +102,7 @@ model Event {
   updatedAt     temporal.updatedAt()
 
   @@index([buildingId, eventDate])
+  @@index([spaceId, eventDate])
   @@index([eventDate, session, eventStatus, paymentStatus])
-  @@index([buildingId, eventDate, session], where: "(\"eventStatus\" = 'ACTIVE')", unique: true, name: "event_active_slot")
+  @@index([spaceId, eventDate, session], where: "(\"eventStatus\" = 'ACTIVE')", unique: true, name: "event_active_space_slot")
 }
