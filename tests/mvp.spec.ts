@@ -43,7 +43,7 @@ test("event amount fields format rupiah values while keeping the workflow submit
   await page.goto("/dashboard/events/new");
 
   await expect(page.getByLabel("Total tagihan")).toHaveValue("Rp 0");
-  await expect(page.getByLabel("Jumlah DP")).toHaveValue("Rp 0");
+  await expect(page.getByLabel("Jumlah DP")).toHaveValue("");
   await expect(page.getByLabel("Pelunasan (opsional)")).toHaveValue("Rp 0");
 
   await page.getByLabel("Total tagihan").fill("150000");
@@ -56,6 +56,20 @@ test("event amount fields format rupiah values while keeping the workflow submit
   await expect(page.locator('input[type="hidden"][name="totalAmount"]')).toHaveValue("150000");
   await expect(page.locator('input[type="hidden"][name="downPayment"]')).toHaveValue("25000");
   await expect(page.locator('input[type="hidden"][name="finalPayment"]')).toHaveValue("125000");
+});
+
+test("creating an event requires a positive down payment", async ({ page }) => {
+  await login(page, alpha);
+  await page.goto("/dashboard/events/new");
+  await page.getByLabel("Nama client").fill("E2E Test DP Required");
+  await page.getByLabel("Tanggal acara").fill("2098-01-09");
+  await page.locator('select[name="session"]').selectOption("DAY");
+  await page.getByLabel("Total tagihan").fill("100000");
+  await page.getByLabel("Jumlah DP").fill("0");
+  await page.getByRole("button", { name: "Simpan acara" }).click();
+
+  await expect(page).toHaveURL(/\/dashboard\/events\/new$/);
+  await expect(page.getByRole("alert")).toHaveText("Periksa kembali data acara yang diisi.");
 });
 
 test("authentication redirects unauthenticated users, persists a session, and logs out", async ({ page }) => {
@@ -88,8 +102,8 @@ test("building admin is isolated to their building and cannot read another build
 
 test("event lifecycle calculates payment status, rejects a duplicate active slot, and retains cancelled history", async ({ page }) => {
   await login(page, alpha);
-  await createEvent(page, { clientName: "E2E Test Lifecycle", eventDate: "2098-01-10", downPayment: "0" });
-  await expect(page.getByText("Belum bayar")).toBeVisible();
+  await createEvent(page, { clientName: "E2E Test Lifecycle", eventDate: "2098-01-10", downPayment: "25000" });
+  await expect(page.getByText("DP dibayar")).toBeVisible();
 
   await page.getByLabel("Nilai pelunasan").fill("100000");
   await page.getByRole("button", { name: "Simpan", exact: true }).click();
@@ -101,7 +115,7 @@ test("event lifecycle calculates payment status, rejects a duplicate active slot
   await page.getByLabel("Tanggal acara").fill("2098-01-10");
   await page.locator('select[name="session"]').selectOption("DAY");
   await page.getByLabel("Total tagihan").fill("100000");
-  await page.getByLabel("Jumlah DP").fill("0");
+  await page.getByLabel("Jumlah DP").fill("25000");
   await page.getByRole("button", { name: "Simpan acara" }).click();
   await expect(page.getByText("Sesi pada tanggal tersebut sudah digunakan. Pilih sesi atau tanggal lain.", { exact: true })).toBeVisible();
 

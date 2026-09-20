@@ -38,7 +38,7 @@ export function EventForm() {
       </div>
       <Field label="Total tagihan"><CurrencyInput defaultValue="0" name="totalAmount" required /></Field>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Jumlah DP"><CurrencyInput defaultValue="0" name="downPayment" required /></Field>
+        <Field label="Jumlah DP"><CurrencyInput name="downPayment" placeholder="Minimal Rp1" required /></Field>
         <Field label="Pelunasan (opsional)"><CurrencyInput defaultValue="0" name="finalPayment" /></Field>
       </div>
       {clientError || state.error ? <p className="text-sm text-destructive" role="alert">{clientError ?? state.error}</p> : null}
