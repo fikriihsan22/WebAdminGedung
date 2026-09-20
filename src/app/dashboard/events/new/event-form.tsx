@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { CurrencyInput } from "@/components/ui/currency-input";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { createEventAction, type CreateEventActionState } from "./actions";
@@ -35,10 +36,10 @@ export function EventForm() {
         <Field label="Tanggal acara"><Input name="eventDate" required type="date" /></Field>
         <Field label="Sesi"><Select defaultValue="" name="session" required><option disabled value="">Pilih sesi</option><option value="DAY">Siang</option><option value="NIGHT">Malam</option></Select></Field>
       </div>
-      <Field label="Total tagihan"><Input inputMode="numeric" min="0" name="totalAmount" required type="number" /></Field>
+      <Field label="Total tagihan"><CurrencyInput defaultValue="0" name="totalAmount" required /></Field>
       <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Jumlah DP"><Input defaultValue="0" inputMode="numeric" min="0" name="downPayment" required type="number" /></Field>
-        <Field label="Pelunasan (opsional)"><Input inputMode="numeric" min="0" name="finalPayment" type="number" /></Field>
+        <Field label="Jumlah DP"><CurrencyInput defaultValue="0" name="downPayment" required /></Field>
+        <Field label="Pelunasan (opsional)"><CurrencyInput defaultValue="0" name="finalPayment" /></Field>
       </div>
       {clientError || state.error ? <p className="text-sm text-destructive" role="alert">{clientError ?? state.error}</p> : null}
       <Button className="w-full sm:w-auto" disabled={isPending} type="submit">{isPending ? "Menyimpan..." : "Simpan acara"}</Button>

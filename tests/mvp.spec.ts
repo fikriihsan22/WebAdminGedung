@@ -37,6 +37,27 @@ async function createEvent(page: Page, values: { clientName: string; eventDate: 
   await expect(page).toHaveURL(/\/dashboard\/events\/.+\?created=1$/);
 }
 
+test("event amount fields format rupiah values while keeping the workflow submittable", async ({ page }) => {
+  await login(page, alpha);
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto("/dashboard/events/new");
+
+  await expect(page.getByLabel("Total tagihan")).toHaveValue("Rp 0");
+  await expect(page.getByLabel("Jumlah DP")).toHaveValue("Rp 0");
+  await expect(page.getByLabel("Pelunasan (opsional)")).toHaveValue("Rp 0");
+
+  await page.getByLabel("Total tagihan").fill("150000");
+  await page.getByLabel("Jumlah DP").fill("25000");
+  await page.getByLabel("Pelunasan (opsional)").fill("125000");
+
+  await expect(page.getByLabel("Total tagihan")).toHaveValue("Rp 150.000");
+  await expect(page.getByLabel("Jumlah DP")).toHaveValue("Rp 25.000");
+  await expect(page.getByLabel("Pelunasan (opsional)")).toHaveValue("Rp 125.000");
+  await expect(page.locator('input[type="hidden"][name="totalAmount"]')).toHaveValue("150000");
+  await expect(page.locator('input[type="hidden"][name="downPayment"]')).toHaveValue("25000");
+  await expect(page.locator('input[type="hidden"][name="finalPayment"]')).toHaveValue("125000");
+});
+
 test("authentication redirects unauthenticated users, persists a session, and logs out", async ({ page }) => {
   await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/login$/);
