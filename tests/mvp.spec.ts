@@ -160,6 +160,30 @@ test("DP status and central dashboard filters use the same event dataset", async
   await expect(page.getByRole("button", { name: "Simpan acara" })).not.toBeVisible();
 });
 
+test("calendar keeps building events scoped and central filters one building", async ({ page }) => {
+  await login(page, alpha);
+  await page.getByRole("link", { name: "Calendar" }).click();
+  await expect(page).toHaveURL(/\/dashboard\/calendar/);
+  await expect(page.getByText("PT Nusantara")).toBeVisible();
+  await expect(page.getByText("Komunitas Harmoni")).not.toBeVisible();
+  await expect(page.getByRole("link", { name: "Lihat detail PT Nusantara, sesi siang" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Keluar" }).click();
+  await login(page, central);
+  await page.getByRole("link", { name: "Calendar" }).click();
+  await expect(page).toHaveURL(/\/central\/calendar/);
+  await expect(page.locator('select[name="buildingId"]')).toHaveValue("building-alpha");
+  await expect(page.getByText("PT Nusantara")).toBeVisible();
+  await expect(page.getByText("Komunitas Harmoni")).not.toBeVisible();
+  await expect(page.getByRole("link", { name: "Lihat detail PT Nusantara, sesi siang" })).toHaveCount(0);
+
+  await page.locator('select[name="buildingId"]').selectOption("building-beta");
+  await page.getByRole("button", { name: "Tampilkan calendar" }).click();
+  await expect(page).toHaveURL(/\/central\/calendar\?month=\d{4}-\d{2}&buildingId=building-beta$/);
+  await expect(page.getByText("Komunitas Harmoni")).toBeVisible();
+  await expect(page.getByText("PT Nusantara")).not.toBeVisible();
+});
+
 test("desktop sidebar remains visible while the page scrolls", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 600 });
   await login(page, central);
@@ -167,8 +191,22 @@ test("desktop sidebar remains visible while the page scrolls", async ({ page }) 
   const sidebar = page.locator("aside");
   await expect(sidebar).toBeVisible();
   await expect(page.getByRole("navigation", { name: "Navigasi utama" })).toHaveCount(1);
+  await expect(page.getByRole("navigation", { name: "Navigasi utama" }).getByRole("link", { name: "Calendar" })).toBeVisible();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollHeight > window.innerHeight)).toBe(true);
 
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await expect.poll(async () => (await sidebar.boundingBox())?.y).toBe(0);
+});
+
+test("mobile calendar keeps the full monthly grid available by horizontal scroll", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await login(page, alpha);
+  const mobileNavigation = page.getByRole("navigation", { name: "Navigasi mobile" });
+  await expect(mobileNavigation.getByRole("link", { name: "Calendar" })).toBeVisible();
+
+  await mobileNavigation.getByRole("link", { name: "Calendar" }).click();
+  const calendarGrid = page.getByRole("grid", { name: /Calendar/ });
+  await expect(calendarGrid).toBeVisible();
+  await expect(calendarGrid.locator("..")).toHaveAttribute("role", "region");
+  expect(await calendarGrid.locator("..").evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
 });
