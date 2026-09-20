@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { cleanupTestEvents, closeTestDatabase } from "./database";
+import { cleanupTestEvents, closeTestDatabase, createTestCalendarEvent } from "./database";
 
 const alpha = { username: "admin.alpha", pin: "123456" };
 const central = { username: "admin.pusat", pin: "123456" };
@@ -35,6 +35,11 @@ async function createEvent(page: Page, values: { clientName: string; eventDate: 
   await page.getByLabel("Jumlah DP").fill(values.downPayment);
   await page.getByRole("button", { name: "Simpan acara" }).click();
   await expect(page).toHaveURL(/\/dashboard\/events\/.+\?created=1$/);
+}
+
+function currentCalendarMonth() {
+  const today = Temporal.Now.instant().toZonedDateTimeISO("Asia/Jakarta");
+  return `${today.year}-${String(today.month).padStart(2, "0")}`;
 }
 
 test("event amount fields format rupiah values while keeping the workflow submittable", async ({ page }) => {
@@ -184,6 +189,28 @@ test("calendar keeps building events scoped and central filters one building", a
   await expect(page.getByText("PT Nusantara")).not.toBeVisible();
 });
 
+test("calendar hides cancelled and unpaid events while preserving month navigation", async ({ page }) => {
+  const month = currentCalendarMonth();
+  const eventDate = Temporal.ZonedDateTime.from(`${month}-15T00:00:00[Asia/Jakarta]`).toInstant();
+  await createTestCalendarEvent({ clientName: "Calendar Cancelled", eventDate, eventStatus: "CANCELLED", paymentStatus: "DP_PAID" });
+  await createTestCalendarEvent({ clientName: "Calendar Unpaid", eventDate, eventStatus: "ACTIVE", paymentStatus: "UNPAID" });
+
+  await login(page, alpha);
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.goto("/dashboard/calendar");
+  await expect(page).toHaveURL(/\/dashboard\/calendar$/);
+  await expect(page.getByText("Calendar tidak dapat dimuat")).not.toBeVisible();
+  const monthNavigation = page.getByRole("navigation", { name: "Navigasi bulan" });
+  await expect(monthNavigation).toBeVisible();
+  await expect(page.getByText("E2E Test Calendar Cancelled")).not.toBeVisible();
+  await expect(page.getByText("E2E Test Calendar Unpaid")).not.toBeVisible();
+
+  await monthNavigation.getByText("Berikutnya", { exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/dashboard/calendar\\?month=${monthOffset(month, 1)}$`));
+  await page.getByRole("navigation", { name: "Navigasi bulan" }).getByText("Bulan ini", { exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/dashboard/calendar\\?month=${currentCalendarMonth()}$`));
+});
+
 test("desktop sidebar remains visible while the page scrolls", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 600 });
   await login(page, central);
@@ -210,3 +237,9 @@ test("mobile calendar keeps the full monthly grid available by horizontal scroll
   await expect(calendarGrid.locator("..")).toHaveAttribute("role", "region");
   expect(await calendarGrid.locator("..").evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true);
 });
+
+function monthOffset(month: string, offset: number) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  const date = new Date(Date.UTC(year, monthNumber - 1 + offset, 1));
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
